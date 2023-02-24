@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactDOM  from 'react-dom';
 import { Text, TextInput, View, Button, Alert } from 'react-native';
 import emailValidator from 'email-validator';
 import passwordValidator from 'password-validator';
@@ -36,13 +37,20 @@ class Login extends Component {
     
   
     validationTest = (email,password)=>{
+      
       let bothCheck=false;
       let emailCheck=this.validationEmail(email);
       let passwordCheck=this.validatePassword(password);
   
+      
+
       if(emailCheck===false && passwordCheck===false){
+        
+        // here
         ReactDOM.render(<EmailBox/>, document.getElementById('emailValidation'));
+        alert(1);
         ReactDOM.render(<PasswordBox/>, document.getElementById('passwordValidation'));
+        
       } else if(emailCheck === false ){
         ReactDOM.render(<EmailBox/>, document.getElementById('emailValidation'));
       } 
@@ -54,6 +62,8 @@ class Login extends Component {
         ReactDOM.render(<SuccessBox/>, document.getElementById('successValidation'));
         bothCheck=true;
       }
+
+      
   
       return bothCheck;
     }
@@ -63,6 +73,7 @@ class Login extends Component {
     }
   
     login=()=>{
+      
       this.validationTest(this.state.email,this.state.password);
     };
     
@@ -101,11 +112,11 @@ class Login extends Component {
           <div id='successValidation'></div>
           </div>
   
-          {/* {this.state.password} */}
+          
         </View>
       );
     }
   
   }
   
-  export default App
+  export default Login;

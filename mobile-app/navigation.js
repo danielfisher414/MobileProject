@@ -1,40 +1,49 @@
-import * as React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-// import {HomeScreen} from './screens/HomeScreen';
+import React from 'react';
+import { View, Text, Button } from 'react-native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Login from './screens/login';
+
 const Stack = createNativeStackNavigator();
 
 const Navigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{title: 'Welcome'}}
-        />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Detail" component={DetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
-const HomeScreen = ({navigation}) => {
-    return (
-      <Button
-        title="Go to Jane's profile"
-        onPress={() =>
-          navigation.navigate('Profile', {name: 'Jane'})
-        }
-      />
-    );
-  };
-  const ProfileScreen = ({navigation, route}) => {
-    return <Text>This is {route.params.name}'s profile</Text>;
-  };
+const HomeScreen = () => {
+  const navigation = useNavigation();
 
-  export default () =>{
-    <NavigationContainer>
-      <navigation/>
-    </NavigationContainer>
-  }
+  return (
+    <View>
+      <Text>This is the home screen.</Text>
+      <Button
+        title="Go to Detail Screen"
+        onPress={() => navigation.navigate('Detail')}
+      />
+    </View>
+  );
+};
+
+const DetailScreen = () => {
+  const navigation = useNavigation();
+
+  return (
+    <View>
+      <Text>This is the detail screen.</Text>
+      <Button
+        title="Go back"
+        onPress={() => navigation.goBack()}
+      />
+    </View>
+  );
+};
+
+
+export default Navigation;
