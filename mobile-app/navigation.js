@@ -17,33 +17,30 @@ const Navigation = () => {
   );
 };
 
-const HomeScreen = () => {
-  const navigation = useNavigation();
 
+const DetailScreen = ({ route }) => {
+  const { isAuthenticated } = route.params;
   return (
     <View>
-      <Text>This is the home screen.</Text>
-      <Button
-        title="Go to Detail Screen"
-        onPress={() => navigation.navigate('Detail')}
-      />
-    </View>
-  );
-};
-
-const DetailScreen = () => {
-  const navigation = useNavigation();
-
-  return (
-    <View>
-      <Text>This is the detail screen.</Text>
-      <Button
-        title="Go back"
-        onPress={() => navigation.goBack()}
-      />
+      <Text>{isAuthenticated ? 'Authenticated' : 'Not authenticated'}</Text>
     </View>
   );
 };
 
 
 export default Navigation;
+
+
+// const HomeScreen = () => {
+//   const navigation = useNavigation();
+
+//   return (
+//     <View>
+//       <Text>This is the home screen.</Text>
+//       <Button
+//         title="Go to Detail Screen"
+//         onPress={() => navigation.navigate('Detail')}
+//       />
+//     </View>
+//   );
+// };
