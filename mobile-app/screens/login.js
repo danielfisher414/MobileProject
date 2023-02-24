@@ -6,7 +6,8 @@ import passwordValidator from 'password-validator';
 import {PasswordBox} from '../loginValidation/passwordBox';
 import { EmailBox } from '../loginValidation/emailBox';
 import {SuccessBox} from '../loginValidation/successBox';
-
+import { useNavigation } from '@react-navigation/native';
+import {Navigation} from '../navigation';
 // import { createNativeStackNavigator } from '@react-navigation/native-stack’
 
 class Login extends Component {
@@ -14,6 +15,13 @@ class Login extends Component {
       super(props);
       this.state = {email:'',password:''};
     };
+
+    
+  handleLogin = () => {
+    const { navigation } = this.props;
+    const isAuthenticated = true;
+    navigation.navigate('Detail', { isAuthenticated });
+  };
   
   validatePassword = (password) =>{
   const schema = new passwordValidator();
@@ -34,10 +42,11 @@ class Login extends Component {
       return false;
     }
   }
-    
-  
+
     validationTest = (email,password)=>{
       
+
+
       let bothCheck=false;
       let emailCheck=this.validationEmail(email);
       let passwordCheck=this.validatePassword(password);
@@ -48,19 +57,22 @@ class Login extends Component {
         
         // here
         ReactDOM.render(<EmailBox/>, document.getElementById('emailValidation'));
-        alert(1);
         ReactDOM.render(<PasswordBox/>, document.getElementById('passwordValidation'));
         
       } else if(emailCheck === false ){
         ReactDOM.render(<EmailBox/>, document.getElementById('emailValidation'));
       } 
       else if(passwordCheck === false ){
+       
         ReactDOM.render(<PasswordBox/>, document.getElementById('passwordValidation'));
         
       }
       else{
+        // this.handleLogin();
         ReactDOM.render(<SuccessBox/>, document.getElementById('successValidation'));
         bothCheck=true;
+        this.handleLogin();
+        
       }
 
       
@@ -75,6 +87,7 @@ class Login extends Component {
     login=()=>{
       
       this.validationTest(this.state.email,this.state.password);
+      
     };
     
     handleEmailTextChange=(newtext)=>{
@@ -107,7 +120,8 @@ class Login extends Component {
             <div id='passwordValidation'></div>
             
           </div>
-          <button onClick={this.login}>Login</button>
+          {/* <button onClick={this.login}>Login</button> */}
+                  <Button title="Login" onPress={this.handleLogin} />
           
           <div id='successValidation'></div>
           </div>
