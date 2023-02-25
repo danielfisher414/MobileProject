@@ -22,6 +22,11 @@ class Login extends Component {
     const isAuthenticated = true;
     navigation.navigate('Home', { isAuthenticated });
   };
+
+  createAccount= () => {
+    const { navigation } = this.props;
+    navigation.navigate('CreateAccount');
+  };
   
   validatePassword = (password) =>{
   const schema = new passwordValidator();
@@ -121,7 +126,8 @@ class Login extends Component {
             
           </div>
           <Button title="Login" onPress={this.login}/>
-                  {/* <Button title="Login" onPress={this.handleLogin} /> */}
+          <Button title="Create An Account" onPress={this.createAccount}/>
+
           
           <div id='successValidation'></div>
           </div>
