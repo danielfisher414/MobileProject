@@ -1,11 +1,24 @@
 import React, { Component } from 'react';
-import { Text, View } from 'react-native';
-
+import { Text, TextInput, View, Button, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import {Navigation} from '../navigation';
 class HomeScreen extends Component{
+
+  handleAboutMe = () =>{
+    const { navigation } = this.props;
+    navigation.navigate('AboutMe');
+  };
+  
   render(){
+    
     return(
+      
         <View>
-          <Text>Home Screen</Text>
+          <Text>Home Screen!</Text>
+              <Button
+                title="Go to About Me"
+                onPress={this.handleAboutMe}
+      />
         </View>
     );
   }

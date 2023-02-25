@@ -20,7 +20,7 @@ class Login extends Component {
   handleLogin = () => {
     const { navigation } = this.props;
     const isAuthenticated = true;
-    navigation.navigate('Detail', { isAuthenticated });
+    navigation.navigate('Home', { isAuthenticated });
   };
   
   validatePassword = (password) =>{
@@ -45,7 +45,7 @@ class Login extends Component {
 
     validationTest = (email,password)=>{
       
-
+      this.handleLogin();
 
       let bothCheck=false;
       let emailCheck=this.validationEmail(email);
@@ -54,7 +54,7 @@ class Login extends Component {
       
 
       if(emailCheck===false && passwordCheck===false){
-        
+       
         // here
         ReactDOM.render(<EmailBox/>, document.getElementById('emailValidation'));
         ReactDOM.render(<PasswordBox/>, document.getElementById('passwordValidation'));
@@ -71,7 +71,7 @@ class Login extends Component {
         // this.handleLogin();
         ReactDOM.render(<SuccessBox/>, document.getElementById('successValidation'));
         bothCheck=true;
-        this.handleLogin();
+        
         
       }
 
@@ -120,8 +120,8 @@ class Login extends Component {
             <div id='passwordValidation'></div>
             
           </div>
-          {/* <button onClick={this.login}>Login</button> */}
-                  <Button title="Login" onPress={this.handleLogin} />
+          <Button title="Login" onPress={this.login}/>
+                  {/* <Button title="Login" onPress={this.handleLogin} /> */}
           
           <div id='successValidation'></div>
           </div>

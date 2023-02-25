@@ -3,6 +3,8 @@ import { View, Text, Button } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from './screens/login';
+import HomeScreen from './screens/HomeScreen';
+import AboutMe from './screens/AboutMe';
 
 const Stack = createNativeStackNavigator();
 
@@ -11,21 +13,22 @@ const Navigation = () => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Detail" component={DetailScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="AboutMe" component={AboutMe} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
 
-const DetailScreen = ({ route }) => {
-  const { isAuthenticated } = route.params;
-  return (
-    <View>
-      <Text>{isAuthenticated ? 'Authenticated' : 'Not authenticated'}</Text>
-    </View>
-  );
-};
+// const HomeScreen = ({ route }) => {
+//   const { isAuthenticated } = route.params;
+//   return (
+//     <View>
+//       <Text>{isAuthenticated ? 'Authenticated' : 'Not authenticated'}</Text>
+//     </View>
+//   );
+// };
 
 
 export default Navigation;
