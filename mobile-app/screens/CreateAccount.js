@@ -10,6 +10,23 @@ class CreateAccount extends Component{
         this.state={firstName:'',lastName:'',email:'',password:''}
     }
 
+    createAccount = () =>{
+        alert(1);
+        fetch('http://localhost:3333/api/1.0.0/user', {
+    method: 'POST',
+    headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        first_name: 'Adsaley',
+        last_name: 'Williams',
+        email: 'asdsaliams@mmu.ac.uk',
+        password: 'Wr3xh4m',
+    }),
+    });
+    }
+
     handleFirstNameTextChange=(newtext)=>{
         this.setState({firstName:newtext})
       };
@@ -25,9 +42,9 @@ class CreateAccount extends Component{
     handlePasswordTextChange=(newtext)=>{
         this.setState({password:newtext})
     };
-    CreateAccount = () =>{
-        alert(1);
-    }
+    // CreateAccount = () =>{
+    //     alert(1);
+    // }
   
   render(){
     
@@ -73,7 +90,7 @@ class CreateAccount extends Component{
             {/* end of text inputs */}
               <Button
                 title="Create Account"
-                onPress={this.CreateAccount}
+                onPress={this.createAccount}
       />
         </View>
     );
