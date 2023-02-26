@@ -106,7 +106,6 @@ class Login extends Component {
         .then(response => {
           if (response.status === 200) {
             // Success
-            // alert('yay')
             // go to main page
             this.handleLogin();
             // return response.json(); // Return the JSON response
