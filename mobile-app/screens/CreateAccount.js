@@ -18,10 +18,10 @@ class CreateAccount extends Component{
         'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-        first_name: 'Adsaley',
-        last_name: 'Williams',
-        email: 'asdsaliams@mmu.ac.uk',
-        password: 'Wr3xh4m!',
+        first_name: this.state.firstName,
+        last_name: this.state.lastName,
+        email: this.state.email,
+        password: this.state.password,
     }),
     });
     }
@@ -41,20 +41,17 @@ class CreateAccount extends Component{
     handlePasswordTextChange=(newtext)=>{
         this.setState({password:newtext})
     };
-    // CreateAccount = () =>{
-    //     alert(1);
-    // }
-  
+
   render(){
     
     return(
       
         <View>
-            {/* start of text inputs */}
+           
             <div>       
             <h4>Enter First Name</h4>
             <TextInput placeholder='First Name'
-            // onChangeText={this.handleEmailTextChange}
+            onChangeText={this.handleFirstNameTextChange}
             value={this.state.firstName}
             />
             <div id='emailValidation'></div>
@@ -62,7 +59,7 @@ class CreateAccount extends Component{
           <div>       
             <h4>Enter Last Name</h4>
             <TextInput placeholder='Last Name'
-            // onChangeText={this.handleEmailTextChange}
+            onChangeText={this.handleLastNameTextChange}
             value={this.state.lastName}
             />
             <div id='emailValidation'></div>
@@ -70,7 +67,7 @@ class CreateAccount extends Component{
           <div>       
             <h4>Enter Email</h4>
             <TextInput placeholder='Email'
-            // onChangeText={this.handleEmailTextChange}
+            onChangeText={this.handleEmailTextChange}
             value={this.state.email}
             />
             <div id='emailValidation'></div>
@@ -78,15 +75,13 @@ class CreateAccount extends Component{
           <div>       
             <h4>Enter Password</h4>
             <TextInput placeholder='Password'
-            // secureTextEntry={true}
-            // onChangeText={this.handlePasswordTextChange}
+            onChangeText={this.handlePasswordTextChange}
             value={this.state.password}
             />
             <div id='passwordValidation'></div>
             
           </div>
 
-            {/* end of text inputs */}
               <Button
                 title="Create Account"
                 onPress={this.createAccount}
