@@ -11,7 +11,6 @@ class CreateAccount extends Component{
     }
 
     createAccount = () =>{
-        alert(1);
         fetch('http://localhost:3333/api/1.0.0/user', {
     method: 'POST',
     headers: {
@@ -22,7 +21,7 @@ class CreateAccount extends Component{
         first_name: 'Adsaley',
         last_name: 'Williams',
         email: 'asdsaliams@mmu.ac.uk',
-        password: 'Wr3xh4m',
+        password: 'Wr3xh4m!',
     }),
     });
     }
