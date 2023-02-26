@@ -50,7 +50,7 @@ class Login extends Component {
 
     validationTest = (email,password)=>{
       
-      this.handleLogin();
+      
 
       let bothCheck=false;
       let emailCheck=this.validationEmail(email);
@@ -91,8 +91,41 @@ class Login extends Component {
   
     login=()=>{
       
-      this.validationTest(this.state.email,this.state.password);
+      if(this.validationTest(this.state.email,this.state.password)==true){
+        fetch('http://localhost:3333/api/1.0.0/login', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: this.state.email,
+            password: this.state.password,
+          }),
+        })
+        .then(response => {
+          if (response.status === 200) {
+            // Success
+            // alert('yay')
+            // go to main page
+            this.handleLogin();
+            // return response.json(); // Return the JSON response
+          } else {
+            // Error
+            alert(this.state.email+" "+this.state.password)
+            throw new Error('Something went wrong');
+          }
+        })
+        .then(data => {
+          console.log(data); // Handle the JSON response
+        })
+        .catch(error => {
+          console.error(error); // Handle the error
+        });
+          
+      }
       
+
     };
     
     handleEmailTextChange=(newtext)=>{
