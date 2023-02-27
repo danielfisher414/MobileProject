@@ -19,8 +19,7 @@ class Login extends Component {
     
   handleLogin = () => {
     const { navigation } = this.props;
-    const isAuthenticated = true;
-    navigation.navigate('Home', { isAuthenticated });
+    navigation.navigate('Home');
   };
 
   createAccount= () => {
