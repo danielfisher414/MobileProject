@@ -18,7 +18,7 @@ function rand() {
 class Login extends Component {
   constructor(props) {
     super(props);
-    this.state = { email: '', password: '' };
+    this.state = { email: '', password: '' ,id: '' ,token: '' };
     this.handleLogin = this.handleLogin.bind(this);
   };
 
@@ -27,7 +27,8 @@ class Login extends Component {
   handleLogin = () => {
     const token = rand();
     try {
-      AsyncStorage.setItem('id', token)
+      AsyncStorage.setItem('user_id', this.state.id)
+      AsyncStorage.setItem('session_token', this.state.token)
         .then(() => {
           console.log('Value stored successfully!');
           // reloading the page
@@ -68,13 +69,9 @@ class Login extends Component {
 
   validationTest = (email, password) => {
 
-
-
     let bothCheck = false;
     let emailCheck = this.validationEmail(email);
     let passwordCheck = this.validatePassword(password);
-
-
 
     if (emailCheck === false && passwordCheck === false) {
 
@@ -95,9 +92,7 @@ class Login extends Component {
       ReactDOM.render(<SuccessBox />, document.getElementById('successValidation'));
       bothCheck = true;
 
-
     }
-
 
 
     return bothCheck;
@@ -124,17 +119,18 @@ class Login extends Component {
         .then(response => {
           if (response.status === 200) {
             // Success
-            // go to main page
-            this.handleLogin();
-            // return response.json(); // Return the JSON response
+            return response.json(); // Return the JSON response
           } else {
             // Error
-            alert(this.state.email + " " + this.state.password)
             throw new Error('Something went wrong');
           }
         })
         .then(data => {
-          console.log(data); // Handle the JSON response
+          // retrieving the user id and token
+          this.state.id= data.id;
+          this.state.token= data.token;
+          this.handleLogin();
+          // console.log(data.id); // Handle the JSON response
         })
         .catch(error => {
           console.error(error); // Handle the error

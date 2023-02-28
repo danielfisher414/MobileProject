@@ -18,7 +18,7 @@ const App = () => {
 
 
   useEffect(() => {
-    AsyncStorage.getItem('id')
+    AsyncStorage.getItem('user_id')
       .then((value) => {
         if (value !== null) {
           setId(value);

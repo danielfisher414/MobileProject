@@ -9,7 +9,7 @@ import AboutMe from './screens/AboutMe';
 import CreateAccount from './screens/CreateAccount';
 import Chats from './screens/Chats';
 import Contacts from './screens/Contacts';
-import AboutMe from './screens/CreateAccount';
+// import AboutMe from './screens/CreateAccount';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
