@@ -13,7 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // import { createNativeStackNavigator } from '@react-navigation/native-stack’
 
 function rand() {
-  return (Math.floor(Math.random() * (200 - 100) + 500).toString());
+  return (Math.floor(Math.random() * (500 - 100) + 500).toString());
 }
 class Login extends Component {
   constructor(props) {
@@ -30,6 +30,8 @@ class Login extends Component {
       AsyncStorage.setItem('id', token)
         .then(() => {
           console.log('Value stored successfully!');
+          // reloading the page
+          window.location.reload(false);
         })
         .catch((error) => {
           console.log('AsyncStorage error: ', error);

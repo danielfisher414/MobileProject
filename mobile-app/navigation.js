@@ -7,6 +7,9 @@ import Login from './screens/login';
 import HomeScreen from './screens/HomeScreen';
 import AboutMe from './screens/AboutMe';
 import CreateAccount from './screens/CreateAccount';
+import Chats from './screens/Chats';
+import Contacts from './screens/Contacts';
+import AboutMe from './screens/CreateAccount';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -29,6 +32,8 @@ const HomeTab = () => {
     <NavigationContainer independent={true}>
       <Tab.Navigator>
       <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Chats" component={Chats} />
+      <Tab.Screen name="Contacts" component={Contacts} />
       <Tab.Screen name="AboutMe" component={AboutMe} /> 
       </Tab.Navigator>
     </NavigationContainer>

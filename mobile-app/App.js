@@ -22,6 +22,7 @@ const App = () => {
       .then((value) => {
         if (value !== null) {
           setId(value);
+          
         }
       })
       .catch((error) => console.log(error));
