@@ -1,18 +1,39 @@
 
 import React, { useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { Text, TextInput, View, Button, Alert } from 'react-native';
 import {Navigation, HomeTab} from './navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const App = () => {
-  const [showNavigation, setShowNavigation] = useState(false);
+  const setToken =(token) =>{
+    this.token = token;
+  }
+  const getToken =() =>{
+    return this.token;
+  }
 
+  const [id, setId] = useState(null);
+
+
+  useEffect(() => {
+    AsyncStorage.getItem('id')
+      .then((value) => {
+        if (value !== null) {
+          setId(value);
+        }
+      })
+      .catch((error) => console.log(error));
+  }, []);
+
+  // this.setNavigation(false);
 
   return (
 
     <NavigationContainer>
-      {showNavigation ? <Navigation/>:<HomeTab/>}
+      {id != null ? <HomeTab/>:<Navigation/>}
+      {/* <Button title="hi" onPress={this.checkLoggedIn}/> */}
     </NavigationContainer>
 
   );
