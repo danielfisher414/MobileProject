@@ -26,6 +26,8 @@ class Chats extends Component{
       })
       .catch((error) => console.log(error));
   };
+
+
   handleCreateChat = () =>{
     const requestBody = {
       name: this.state.chatName
@@ -53,12 +55,10 @@ class Chats extends Component{
       .then(data => {
         console.log(data); // Handle the JSON response
         
-        data.forEach(user =>{
-          this.createUserContact(user.given_name, user.family_name, user.email);
-        });
       })
       .catch(error => {
-        console.error(error); // Handle the error
+        console.error(error.message); // Handle the error
+        // console.error(error.response); // Handle the error
       });
   };
 
@@ -76,17 +76,24 @@ class Chats extends Component{
         <View>
           <Text>Chat</Text>
           <Button title='Create Chat' onPress={this.handleOverlay}/>
-          
+
+          {/* all chats visable */}
+          <div id='allChatsBox' >
+            
+          </div>
+          {/* end all chats visable */}
+
+              {/* OVERLAY */}
+
           <Modal animationType="fade" transparent={true} visible={this.state.visible}>
-          
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
             <View style={{ backgroundColor: 'white', padding: 60 }}>
               <Text>Name the chat!</Text>
-              
               <div id='createChatInput'>
               <TextInput placeholder='chat name' onChangeText={this.handleChatNameTextChange}></TextInput>
               <Button title="Submit" onPress={this.handleCreateChat}/>
               </div>
+              {/* END OF OVERLAY */}
 
               <Button title="Close" onPress={this.handleOverlay} />
             </View>
