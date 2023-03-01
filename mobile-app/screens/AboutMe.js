@@ -14,8 +14,7 @@ class AboutMe extends Component{
 // http://localhost:3333/api/1.0.0/user/{id}
 
 setUserInfo = () =>{
-  console.log(this.state.user_id);
-  console.log(this.state.session_token);
+
   
   fetch('http://localhost:3333/api/1.0.0/user/'+this.state.user_id, {
   method: 'GET',
