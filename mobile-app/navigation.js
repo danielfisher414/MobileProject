@@ -10,6 +10,7 @@ import CreateAccount from './screens/CreateAccount';
 import Chats from './screens/Chats';
 import Contacts from './screens/Contacts';
 // import AboutMe from './screens/CreateAccount';
+import { Ionicons } from '@expo/vector-icons';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -31,10 +32,31 @@ const HomeTab = () => {
   return (
     <NavigationContainer independent={true}>
       <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Chats" component={Chats} />
-      <Tab.Screen name="Contacts" component={Contacts} />
-      <Tab.Screen name="AboutMe" component={AboutMe} /> 
+      <Tab.Screen name="Home" component={HomeScreen} 
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <Ionicons name="home" color={color} size={size} />
+                ),
+              }}
+              />
+      <Tab.Screen name="Chats" component={Chats} 
+                    options={{
+                      tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="chatbox" color={color} size={size} />
+                      ),
+                    }}/>
+      <Tab.Screen name="Contacts" component={Contacts} 
+      options={{
+        tabBarIcon: ({ color, size }) => (
+          <Ionicons name="people" color={color} size={size} />
+        ),
+      }}/>
+      <Tab.Screen name="AboutMe" component={AboutMe} 
+                    options={{
+                      tabBarIcon: ({ color, size }) => (
+                        <Ionicons name="person" color={color} size={size} />
+                      ),
+                    }}/> 
       </Tab.Navigator>
     </NavigationContainer>
   );
