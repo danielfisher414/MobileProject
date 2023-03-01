@@ -43,7 +43,7 @@ class Chats extends Component{
       body: JSON.stringify(requestBody)
     })
       .then(response => {
-        if (response.status === 200) {
+        if (response.status === 201) {
           // Success
     
           return response.json(); // Return the JSON response

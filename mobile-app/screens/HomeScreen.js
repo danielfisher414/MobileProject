@@ -14,7 +14,7 @@ class HomeScreen extends Component{
       
         <View>
           <Text>Home Screen!</Text>
-              <Button
+              <Button 
                 title="Go to About Me"
                 onPress={this.handleAboutMe}
       />
