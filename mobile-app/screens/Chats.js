@@ -8,7 +8,7 @@ class Chats extends Component{
   }
   constructor(props){
     super(props);
-    this.state={user_id:'',session_token:'',visible:false};
+    this.state={user_id:'',session_token:'',visible:false,chatName:''};
     this.getUserInfo = this.getUserInfo.bind(this);
   }
   getUserInfo = () => {
@@ -26,42 +26,49 @@ class Chats extends Component{
       })
       .catch((error) => console.log(error));
   };
-  // handleCreateChat = () =>{
+  handleCreateChat = () =>{
+    const requestBody = {
+      name: this.state.chatName
+    };
 
-  //   fetch('http://localhost:3333/api/1.0.0/search?q='+this.state.searchQuery, {
-  //     method: 'GET',
-  //     headers: {
-  //       Accept: 'application/json',
-  //       'Content-Type': 'application/json',
-  //       'X-Authorization': this.state.session_token
-  //     },
-  //   })
-  //     .then(response => {
-  //       if (response.status === 200) {
-  //         // Success
+    fetch('http://localhost:3333/api/1.0.0/chat', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token
+      },
+      body: JSON.stringify(requestBody)
+    })
+      .then(response => {
+        if (response.status === 200) {
+          // Success
     
-  //         return response.json(); // Return the JSON response
-  //       } else {
-  //         // Error
-  //         throw new Error('Something went wrong');
-  //       }
-  //     })
-  //     .then(data => {
-  //       console.log(data); // Handle the JSON response
+          return response.json(); // Return the JSON response
+        } else {
+          // Error
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        console.log(data); // Handle the JSON response
         
-  //       data.forEach(user =>{
-  //         this.createUserContact(user.given_name, user.family_name, user.email);
-  //       });
-  //     })
-  //     .catch(error => {
-  //       console.error(error); // Handle the error
-  //     });
-  // };
+        data.forEach(user =>{
+          this.createUserContact(user.given_name, user.family_name, user.email);
+        });
+      })
+      .catch(error => {
+        console.error(error); // Handle the error
+      });
+  };
 
   handleOverlay =() =>{
   
     this.setState({ visible: !this.state.visible });
      
+  };
+  handleChatNameTextChange = (newtext) => {
+    this.setState({ chatName: newtext })
   };
 
   render(){
@@ -77,8 +84,8 @@ class Chats extends Component{
               <Text>Name the chat!</Text>
               
               <div id='createChatInput'>
-              <TextInput placeholder='chat name'></TextInput>
-              <Button title="Submit"/>
+              <TextInput placeholder='chat name' onChangeText={this.handleChatNameTextChange}></TextInput>
+              <Button title="Submit" onPress={this.handleCreateChat}/>
               </div>
 
               <Button title="Close" onPress={this.handleOverlay} />
