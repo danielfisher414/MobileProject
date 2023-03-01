@@ -8,7 +8,7 @@ class Chat extends Component{
     return(
         <View>
           <Text>Chat</Text>
-          {/* <Button title='Logout' onPress={this.logout}/> */}
+ 
         </View>
     );
   }

@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
 import { Text, TextInput, View, Button, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import {Navigation} from '../navigation';
-
 
 class CreateAccount extends Component{
     constructor(props){

@@ -11,11 +11,9 @@ class AboutMe extends Component{
     this.state = { first_name: '', last_name: '' ,email: '',user_id:'',session_token:''};
     this.getUserInfo = this.getUserInfo.bind(this);
   }
-// http://localhost:3333/api/1.0.0/user/{id}
 
 setUserInfo = () =>{
 
-  
   fetch('http://localhost:3333/api/1.0.0/user/'+this.state.user_id, {
   method: 'GET',
   headers: {
@@ -63,7 +61,6 @@ getUserInfo = () => {
 
 
   logout =() =>{
-    // alert(10);
     try {
       AsyncStorage.removeItem('user_id');
       AsyncStorage.removeItem('session_token');
@@ -77,7 +74,6 @@ getUserInfo = () => {
   render(){
     return(
         <View>
-          {/* <Text>About Me</Text> */}
           <Text>{this.state.first_name}</Text>
           <Text>{this.state.last_name}</Text>
           <Text>{this.state.email}</Text>

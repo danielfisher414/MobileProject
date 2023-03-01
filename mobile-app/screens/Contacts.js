@@ -9,7 +9,7 @@ class Contact extends Component{
   constructor(props){
     super(props);
     this.state = { user_id:'',session_token:'',data:'',searchQuery:''};
-    // this.getUserInfo = this.getUserInfo.bind(this);
+    this.getUserInfo = this.getUserInfo.bind(this);
   }
 
   getUserInfo = () => {
@@ -50,15 +50,10 @@ class Contact extends Component{
     })
     .then(data => {
       console.log(data); // Handle the JSON response
-      // given_name = data.given_name;
       
       data.forEach(user =>{
-        // console.log(user.email);
         this.createUserContact(user.given_name, user.family_name, user.email);
       });
-
-      // console.log(data[0].email);
-      // document.getElementById('users').innerHTML += data[0].email;
     })
     .catch(error => {
       console.error(error); // Handle the error
@@ -78,7 +73,6 @@ class Contact extends Component{
     return(
         <View>
           <Text>Contact</Text>
-          {/* <Button title='Logout' onPress={this.logout}/> */}
           <TextInput placeholder='Search'
               onChangeText={this.handleSearchTextChange}
             />

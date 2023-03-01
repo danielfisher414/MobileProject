@@ -6,15 +6,8 @@ import passwordValidator from 'password-validator';
 import { PasswordBox } from '../loginValidation/passwordBox';
 import { EmailBox } from '../loginValidation/emailBox';
 import { SuccessBox } from '../loginValidation/successBox';
-import { useNavigation } from '@react-navigation/native';
-import { Navigation } from '../navigation';
-import { App } from '../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { createNativeStackNavigator } from '@react-navigation/native-stack’
 
-function rand() {
-  return (Math.floor(Math.random() * (500 - 100) + 500).toString());
-}
 class Login extends Component {
   constructor(props) {
     super(props);
@@ -25,7 +18,6 @@ class Login extends Component {
 
 
   handleLogin = () => {
-    const token = rand();
     try {
       AsyncStorage.setItem('user_id', this.state.id)
       AsyncStorage.setItem('session_token', this.state.token)
@@ -75,7 +67,6 @@ class Login extends Component {
 
     if (emailCheck === false && passwordCheck === false) {
 
-      // here
       ReactDOM.render(<EmailBox />, document.getElementById('emailValidation'));
       ReactDOM.render(<PasswordBox />, document.getElementById('passwordValidation'));
 
@@ -83,18 +74,13 @@ class Login extends Component {
       ReactDOM.render(<EmailBox />, document.getElementById('emailValidation'));
     }
     else if (passwordCheck === false) {
-
       ReactDOM.render(<PasswordBox />, document.getElementById('passwordValidation'));
-
     }
     else {
-      // this.handleLogin();
       ReactDOM.render(<SuccessBox />, document.getElementById('successValidation'));
       bothCheck = true;
 
     }
-
-
     return bothCheck;
   }
 
@@ -130,7 +116,6 @@ class Login extends Component {
           this.state.id= data.id;
           this.state.token= data.token;
           this.handleLogin();
-          // console.log(data.id); // Handle the JSON response
         })
         .catch(error => {
           console.error(error); // Handle the error
