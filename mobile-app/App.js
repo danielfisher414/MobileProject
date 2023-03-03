@@ -1,4 +1,5 @@
 
+import 'react-native-gesture-handler';
 import React, { useState, useEffect } from 'react';
 import {Navigation, HomeTab} from './navigation';
 import { NavigationContainer} from '@react-navigation/native';
