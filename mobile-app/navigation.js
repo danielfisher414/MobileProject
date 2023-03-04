@@ -2,19 +2,21 @@ import React from 'react';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+// import { createDrawerNavigator } from '@react-navigation/drawer';
+// const Drawer = createDrawerNavigator();
 import Login from './screens/login';
 import HomeScreen from './screens/HomeScreen';
 import AboutMe from './screens/AboutMe';
 import CreateAccount from './screens/CreateAccount';
 import Chats from './screens/Chats';
 import Contacts from './screens/Contacts';
+import Settings from './screens/Settings';
 // import AboutMe from './screens/CreateAccount';
 import { Ionicons } from '@expo/vector-icons';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-const Drawer = createDrawerNavigator();
+
 
 
 const Navigation = () => {
@@ -64,11 +66,12 @@ const HomeTab = () => {
 
 const Conversation = () => {
   return (
-    <NavigationContainer independent={true}>
+    <NavigationContainer>
       <Drawer.Navigator>
         <Drawer.Screen name="Chats" component={Chats} />
+        <Drawer.Screen name="Settings" component={Settings} />
       </Drawer.Navigator>
-    </NavigationContainer>
+      </NavigationContainer>
   );
 };
 

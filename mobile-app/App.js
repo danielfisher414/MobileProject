@@ -25,7 +25,7 @@ const App = () => {
 
     <NavigationContainer>
       {id != null ? <HomeTab/>:<Navigation/>}
-    </NavigationContainer>
+      </NavigationContainer>
 
   );
 };
