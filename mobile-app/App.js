@@ -39,7 +39,7 @@ const App = () => {
   return (
 
     <NavigationContainer>
-      {conversationId!= null ? <Conversation/> :
+      {conversationId == null ? <Conversation/> :
       id == null ? <Navigation/>:<HomeTab/>}
       </NavigationContainer>
 

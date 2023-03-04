@@ -3,7 +3,7 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-// const Drawer = createDrawerNavigator();
+
 import Login from './screens/login';
 import HomeScreen from './screens/HomeScreen';
 import AboutMe from './screens/AboutMe';
@@ -11,6 +11,7 @@ import CreateAccount from './screens/CreateAccount';
 import Chats from './screens/Chats';
 import Contacts from './screens/Contacts';
 import Settings from './screens/Settings';
+import ConversationScreen from './screens/ConversationScreen';
 // import AboutMe from './screens/CreateAccount';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -68,7 +69,7 @@ const Conversation = () => {
   return (
     <NavigationContainer  independent={true}>
       <Drawer.Navigator>
-        <Drawer.Screen name="Chats" component={Chats} />
+        <Drawer.Screen name="Conversation" component={ConversationScreen} />
         <Drawer.Screen name="Settings" component={Settings} />
       </Drawer.Navigator>
       </NavigationContainer>
