@@ -24,7 +24,8 @@ const App = () => {
 
   // get conversationId
   useEffect(() => {
-    AsyncStorage.getItem('conversationId')
+    AsyncStorage.getItem('chat_id')
+    AsyncStorage.getItem('chat_name')
       .then((value) => {
         if (value !== null) {
           console.log(value);
@@ -39,8 +40,9 @@ const App = () => {
   return (
 
     <NavigationContainer>
-      {conversationId == null ? <Conversation/> :
+      {conversationId != null ? <Conversation Conversation screenName={conversationId}/> :
       id == null ? <Navigation/>:<HomeTab/>}
+      {/* {id == null ? <Navigation/>:<Conversation/>} */}
       </NavigationContainer>
 
   );

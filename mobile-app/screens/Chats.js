@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View, Button, Alert,Modal } from 'react-native';
+import { Text, TextInput, View, Button, Alert,Modal, TouchableOpacity} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class Chats extends Component{
@@ -8,9 +8,10 @@ class Chats extends Component{
   }
   constructor(props){
     super(props);
-    this.state={user_id:'',session_token:'',visible:false,chatName:''};
+    this.state={user_id:'',session_token:'',visible:false,chatName:'',chats:[]};
     this.getUserInfo = this.getUserInfo.bind(this);
   }
+  
   getUserInfo = () => {
     Promise.all([
       AsyncStorage.getItem('user_id'),
@@ -19,6 +20,7 @@ class Chats extends Component{
       .then(([user_id, session_token]) => {
         if (user_id && session_token) {
           this.setState({ user_id, session_token });
+          this.getAllConversations();
         } else {
           // handle missing values
           console.log(error);
@@ -27,6 +29,45 @@ class Chats extends Component{
       .catch((error) => console.log(error));
   };
 
+  getAllConversations = () => {
+    fetch('http://localhost:3333/api/1.0.0/chat', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token
+      },
+    })
+      .then(response => {
+        if (response.status === 200) {
+          // Success
+          return response.json(); // Return the JSON response
+        } else {
+          // Error
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        data.forEach(value=>{
+          // let name = value.name;
+          this.handleShowAllChats(value.name);
+        })
+        console.log(data); // Handle the JSON response
+        
+      })
+      .catch(error => {
+        console.error(error.message); // Handle the error
+        // console.error(error.response); // Handle the error
+      });
+  };
+
+  handleShowAllChats = (element) => {
+    // Update the state with the new element
+    this.setState(prevState => ({
+      chats: [...prevState.chats, element]
+      
+    }));
+  };
 
   handleCreateChat = () =>{
     const requestBody = {
@@ -70,6 +111,27 @@ class Chats extends Component{
   handleChatNameTextChange = (newtext) => {
     this.setState({ chatName: newtext })
   };
+  handleClickedOnChatName = (chat,index)=>{
+    console.log('Clicked:', chat,index)
+    this.handleChatScreen(index,chat);
+  };
+
+  handleChatScreen = (chat_id,chat_name) => {
+    try {
+      AsyncStorage.setItem('chat_id', chat_id)
+      AsyncStorage.setItem('chat_name', chat_name)
+        .then(() => {
+          console.log('Value stored successfully!');
+          // reloading the page
+          window.location.reload(false);
+        })
+        .catch((error) => {
+          console.log('AsyncStorage error: ', error);
+        });
+    } catch (error) {
+      console.log('Something went wrong: ', error);
+    }
+  };
 
   render(){
     return(
@@ -78,9 +140,13 @@ class Chats extends Component{
           <Button title='Create Chat' onPress={this.handleOverlay}/>
 
           {/* all chats visable */}
-          <div id='allChatsBox' >
-            
-          </div>
+          <div id="allChatsBox" style={{overflow:'scroll', height:'100%',touchAction: 'none'}}>
+          {this.state.chats.map((chat, index) => (
+            <TouchableOpacity onPress={() => this.handleClickedOnChatName(chat,index)}>
+               <Text style={{ color: 'black', fontSize:'20px',textAlign:'center'}}>{chat}</Text>
+            </TouchableOpacity>
+          ))}
+        </div>
           {/* end all chats visable */}
 
               {/* OVERLAY */}
