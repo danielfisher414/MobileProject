@@ -1,16 +1,8 @@
 import React, { Component } from 'react';
-import "react-chat-elements/dist/main.css"
-import { MessageBox, Input, Button } from 'react-chat-elements';
-import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { Text, TextInput, View} from 'react-native';
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 class ConversationScreen extends Component {
   componentDidMount(){
     this.getChatInfo();
@@ -65,121 +57,64 @@ class ConversationScreen extends Component {
         }
       })
       .then((data) => {
-        const messageList = data.messages.map((message) => {
-          const authorId = message.author.user_id;
-          const messageText = message.message;
-          const messageId = message.message_id;
-  
-          return {
-            position: authorId === this.state.user_id ? 'right' : 'left',
-            type: 'text',
-            text: messageText,
-            date: new Date(),
-          };
-        });
-  
-        this.setState({ messages: messageList });
+      const messages = data.messages.map(message => ({
+        _id: message.message_id,
+        text: message.message,
+        createdAt: new Date(message.timestamp),
+        user: {
+          _id: message.author.user_id,
+          name: message.author.first_name +" "+message.author.last_name,
+          
+        },
+      }));
+
+      this.setState({ messages });
       })
       .catch((error) => {
         console.error(error.message); // Handle the error
       });
   };
 
-  handleInput = (event) => {
-    this.setState({ inputText: event.target.value });
-  }
 
-  handleSubmit = () => {
-    const newMessage = {
-      position: 'right',
-      type: 'text',
-      text: this.state.inputText,
-      date: new Date(),
-    };
-    this.setState({
-      messages: [...this.state.messages, newMessage],
-      inputText: '',
-    });
+  onSend = (newMessages) => {
+    this.setState(previousState => ({
+      messages: GiftedChat.append(previousState.messages, newMessages),
+    }));
+  };
+
+  renderBubble(props) {
+    return (
+      <Bubble
+        {...props}
+        wrapperStyle={{
+          left: {
+            // alternative colour #cccccc
+            backgroundColor: '#cccccc',
+          },
+        }}
+        textStyle={{
+          left: {
+            color: 'black',
+          },
+        }}
+      />
+    );
   }
 
   render() {
     return (
-      <div>
-        <MessageBox
-          position={'left'}
-          text={'Hi there!'}
-          title={'Jane'}
-          date={new Date()}
-        />
-        {this.state.messages.map((message, index) => (
-          <MessageBox
-            key={index}
-            position={message.position}
-            type={message.type}
-            text={message.text}
-            title={message.title}
-            date={message.date}
-          />
-        ))}
-        <div style={{ position: "absolute", bottom: 0, left: 0, width: "100%" }}>
-        <Input 
-          placeholder="Type a message..."
-          multiline={true}
-          value={this.state.inputText}
-          onChange={this.handleInput}
-          rightButtons={
-            <Button
-              color="white"
-              backgroundColor="black"
-              text="Send"
-              onClick={this.handleSubmit}
-            />
-          }
-        />
-          </div>
-      </div>
+      <View style={{ backgroundColor: "white", flex: 1 }}>
+      <GiftedChat
+        messages={this.state.messages}
+        onSend={messages => this.onSend(messages)}
+        user={{
+          _id: 1,
+        }}
+        renderBubble={this.renderBubble}
+      />
+      </View>
     );
   }
 }
 
 export default ConversationScreen;
-
-
-// getAllConversations = () => {
-//   fetch('http://localhost:3333/api/1.0.0/chat/'+this.state.chat_id, {
-//     method: 'GET',
-//     headers: {
-//       Accept: 'application/json',
-//       'Content-Type': 'application/json',
-//       'X-Authorization': this.state.session_token
-//     },
-//   })
-//     .then(response => {
-//       if (response.status === 200) {
-//         // Success
-//         return response.json(); // Return the JSON response
-//       } else {
-//         // Error
-//         throw new Error('Something went wrong');
-//       }
-//     })
-//     .then(data => {
-//       data.messages.forEach((message) => {
-//         const authorId = message.author.user_id;
-//         const messageText = message.message;
-//         const messageId = message.message_id;
-
-
-        
-//         console.log(`Author ID: ${authorId}, Message: ${messageText}, Message: ${messageId}`);
-
-        
-//         // this.setState({messages: messageText});
-//         // renderMessage()
-//       });
-//     })
-//     .catch(error => {
-//       console.error(error.message); // Handle the error
-//       // console.error(error.response); // Handle the error
-//     });
-// };
