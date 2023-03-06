@@ -28,6 +28,7 @@ class Chats extends Component{
       })
       .catch((error) => console.log(error));
   };
+  
 
   getAllConversations = () => {
     fetch('http://localhost:3333/api/1.0.0/chat', {
@@ -112,7 +113,7 @@ class Chats extends Component{
     this.setState({ chatName: newtext })
   };
   handleClickedOnChatName = (chat,index)=>{
-    console.log('Clicked:', chat,index)
+    console.log('Clicked:', index+=1,chat)
     this.handleChatScreen(index,chat);
   };
 

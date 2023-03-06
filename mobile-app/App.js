@@ -24,13 +24,15 @@ const App = () => {
 
   // get conversationId
   useEffect(() => {
-    AsyncStorage.getItem('chat_id')
-    AsyncStorage.getItem('chat_name')
-      .then((value) => {
-        if (value !== null) {
-          console.log(value);
-          conversationSetId(value);
-          
+    Promise.all([
+      AsyncStorage.getItem('chat_id'),
+      AsyncStorage.getItem('chat_name'),
+    ])
+      .then(([chatId, chatName]) => {
+        if (chatId !== null && chatName !== null) {
+          console.log('chat_id:', chatId);
+          console.log('chat_name:', chatName);
+          conversationSetId(chatName);
         }
       })
       .catch((error) => console.log(error));

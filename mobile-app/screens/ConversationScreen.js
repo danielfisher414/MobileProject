@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import "react-chat-elements/dist/main.css"
+import { MessageBox, Input, Button } from 'react-chat-elements';
 import {
   StyleSheet,
   View,
@@ -8,120 +10,176 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 class ConversationScreen extends Component {
+  componentDidMount(){
+    this.getChatInfo();
+  }
   constructor(props) {
     super(props);
     this.state = {
-      messageInput: '',
-      messages: [],
+      messages: [], // array of message objects
+      inputText: '', // text in input box
+      session_token:'',
+      chat_id:'',
+      chat_name:'',
     };
   }
 
-  onSendMessage = () => {
-    const { messageInput, messages } = this.state;
-    if (messageInput.trim() !== '') {
-      const newMessages = messages.slice();
-      newMessages.push(messageInput);
-      this.setState({ messages: newMessages, messageInput: '' });
-    }
+  getChatInfo = () => {
+    Promise.all([
+      AsyncStorage.getItem('chat_id'),
+      AsyncStorage.getItem('chat_name'),
+      AsyncStorage.getItem('session_token'),
+    ])
+      .then(([chat_id, chat_name,session_token ]) => {
+        if (chat_id && chat_name) {
+          this.setState({ chat_id, chat_name,session_token });
+          console.log(this.state.chat_id,this.state.chat_name);
+          console.log(this.state.session_token);
+          this.getAllConversations();
+        } else {
+          // handle missing values
+          console.log(error);
+        }
+      })
+      .catch((error) => console.log(error));
   };
 
-  renderMessage = (message, index) => {
-    return (
-      <View style={styles.messageContainer} key={index}>
-        <View style={styles.messageBubble}>
-          <Text style={styles.messageText}>{message}</Text>
-        </View>
-      </View>
-    );
+  getAllConversations = () => {
+    fetch('http://localhost:3333/api/1.0.0/chat/' + this.state.chat_id, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token,
+      },
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          // Success
+          return response.json(); // Return the JSON response
+        } else {
+          // Error
+          throw new Error('Something went wrong');
+        }
+      })
+      .then((data) => {
+        const messageList = data.messages.map((message) => {
+          const authorId = message.author.user_id;
+          const messageText = message.message;
+          const messageId = message.message_id;
+  
+          return {
+            position: authorId === this.state.user_id ? 'right' : 'left',
+            type: 'text',
+            text: messageText,
+            date: new Date(),
+          };
+        });
+  
+        this.setState({ messages: messageList });
+      })
+      .catch((error) => {
+        console.error(error.message); // Handle the error
+      });
   };
+
+  handleInput = (event) => {
+    this.setState({ inputText: event.target.value });
+  }
+
+  handleSubmit = () => {
+    const newMessage = {
+      position: 'right',
+      type: 'text',
+      text: this.state.inputText,
+      date: new Date(),
+    };
+    this.setState({
+      messages: [...this.state.messages, newMessage],
+      inputText: '',
+    });
+  }
 
   render() {
-    const { messageInput, messages } = this.state;
     return (
-      <View style={styles.container}>
-        <View style={styles.messagesContainer}>
-          {messages.map(this.renderMessage)}
-        </View>
-        <KeyboardAvoidingView
-          style={styles.inputContainer}
-          behavior={Platform.OS === 'ios' ? 'padding' : null}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
-          <TextInput
-            style={styles.textInput}
-            onChangeText={(text) => this.setState({ messageInput: text })}
-            value={messageInput}
-            placeholder="Type a message..."
-            placeholderTextColor="#8a8a8f"
-            returnKeyType="send"
-            onSubmitEditing={this.onSendMessage}
+      <div>
+        <MessageBox
+          position={'left'}
+          text={'Hi there!'}
+          title={'Jane'}
+          date={new Date()}
+        />
+        {this.state.messages.map((message, index) => (
+          <MessageBox
+            key={index}
+            position={message.position}
+            type={message.type}
+            text={message.text}
+            title={message.title}
+            date={message.date}
           />
-          <TouchableOpacity
-            style={styles.sendButton}
-            onPress={this.onSendMessage}>
-            <Text style={styles.sendButtonText}>Send</Text>
-          </TouchableOpacity>
-        </KeyboardAvoidingView>
-      </View>
+        ))}
+        <div style={{ position: "absolute", bottom: 0, left: 0, width: "100%" }}>
+        <Input 
+          placeholder="Type a message..."
+          multiline={true}
+          value={this.state.inputText}
+          onChange={this.handleInput}
+          rightButtons={
+            <Button
+              color="white"
+              backgroundColor="black"
+              text="Send"
+              onClick={this.handleSubmit}
+            />
+          }
+        />
+          </div>
+      </div>
     );
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f8f8',
-  },
-  messagesContainer: {
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingTop: 12,
-  },
-  messageContainer: {
-    flexDirection: 'row',
-    marginBottom: 8,
-    alignItems: 'flex-end',
-  },
-  messageBubble: {
-    backgroundColor: '#0084ff',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    maxWidth: '80%',
-  },
-  messageText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: '#fff',
-    borderTopColor: '#d9d9d9',
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
-  textInput: {
-    flex: 1,
-    height: 36,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 18,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#333',
-  },
-  sendButton: {
-    backgroundColor: '#0084ff',
-    borderRadius: 18,
-    marginLeft: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  sendButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-});
-
 export default ConversationScreen;
+
+
+// getAllConversations = () => {
+//   fetch('http://localhost:3333/api/1.0.0/chat/'+this.state.chat_id, {
+//     method: 'GET',
+//     headers: {
+//       Accept: 'application/json',
+//       'Content-Type': 'application/json',
+//       'X-Authorization': this.state.session_token
+//     },
+//   })
+//     .then(response => {
+//       if (response.status === 200) {
+//         // Success
+//         return response.json(); // Return the JSON response
+//       } else {
+//         // Error
+//         throw new Error('Something went wrong');
+//       }
+//     })
+//     .then(data => {
+//       data.messages.forEach((message) => {
+//         const authorId = message.author.user_id;
+//         const messageText = message.message;
+//         const messageId = message.message_id;
+
+
+        
+//         console.log(`Author ID: ${authorId}, Message: ${messageText}, Message: ${messageId}`);
+
+        
+//         // this.setState({messages: messageText});
+//         // renderMessage()
+//       });
+//     })
+//     .catch(error => {
+//       console.error(error.message); // Handle the error
+//       // console.error(error.response); // Handle the error
+//     });
+// };
