@@ -59,7 +59,7 @@ const HomeTab= () => {
           <Ionicons name="people" color={color} size={size} />
         ),
       }}/>
-      <Tab.Screen name="AboutMe" component={AboutMe} 
+      <Tab.Screen name="Profile" component={AboutMe} 
                     options={{
                       tabBarIcon: ({ color, size }) => (
                         <Ionicons name="person" color={color} size={size} />

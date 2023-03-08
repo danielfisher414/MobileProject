@@ -87,6 +87,7 @@ class AboutMe extends Component {
           </Text>
           <Text style={styles.email}>{this.state.email}</Text>
         </View>
+        <Button title="Edit Profile" onPress={this.editProfile}/>
         <Button title="Logout" onPress={this.logout} />
       </View>
     );
@@ -98,6 +99,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     padding: 20,
+    gap:7
   },
   aboutContainer: {
     marginTop: 50,
@@ -114,6 +116,11 @@ const styles = StyleSheet.create({
     color: '#777',
     marginBottom: 10,
   },
+  // profileBtn: {
+  //   // fontSize: 18,
+  //   // color: '#777',
+  //   justifyContent: 'space-between',
+  // },
 });
 
 export default AboutMe;
