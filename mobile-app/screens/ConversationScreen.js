@@ -88,7 +88,6 @@ class ConversationScreen extends Component {
         {...props}
         wrapperStyle={{
           left: {
-            // alternative colour #cccccc
             backgroundColor: '#cccccc',
           },
         }}
