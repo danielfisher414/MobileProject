@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {Navigation, HomeTab,Conversation} from './navigation';
 import { NavigationContainer} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import EditProfile from './screens/EditProfile';
 const App = () => {
   const [id, setId] = useState(null);
   const [conversationId, conversationSetId] = useState(null);
@@ -40,11 +40,11 @@ const App = () => {
 
 
   return (
+    // <EditProfile/>
 
     <NavigationContainer>
       {conversationId != null ? <Conversation Conversation screenName={conversationId}/> :
       id == null ? <Navigation/>:<HomeTab/>}
-      {/* {id == null ? <Navigation/>:<Conversation/>} */}
       </NavigationContainer>
 
   );
