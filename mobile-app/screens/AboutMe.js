@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View, Button, Alert, StyleSheet } from 'react-native';
+import { Text, TextInput, View, Button, Alert, StyleSheet,Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class AboutMe extends Component {
@@ -86,6 +86,12 @@ class AboutMe extends Component {
   render() {
     return (
       <View style={styles.container}>
+        <View style={styles.innerContainer}>
+                  <Image
+              style={styles.profilePic}
+              source={{ uri: 'https://www.ateneo.edu/sites/default/files/styles/large/public/2021-11/istockphoto-517998264-612x612.jpeg?itok=aMC1MRHJ' }}
+          />
+          </View>
         <View style={styles.aboutContainer}>
           <Text style={styles.name}>
             {this.state.first_name} {this.state.last_name}
@@ -99,13 +105,41 @@ class AboutMe extends Component {
   }
 }
 
+    // container: {
+    //     backgroundColor:'white',
+    //     flex: 1,
+    //     alignItems: 'center',
+    //     // justifyContent: 'center',
+    //     padding: 1,
+    // },
+    // container: {
+    //   flex: 1,
+    //   backgroundColor: 'white',
+    //   padding: 20,
+    //   gap:7
+    // },
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     padding: 20,
     gap:7
   },
+  innerContainer: {
+    flex: 1,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    padding: 20,
+    gap:7
+  },
+  profilePic: {
+    alignItems: 'center',
+    width: 100,
+    height: 100,
+    borderRadius: 100,
+    marginBottom: 20,
+    marginTop: 20,
+},
   aboutContainer: {
     marginTop: 50,
     marginBottom: 30,

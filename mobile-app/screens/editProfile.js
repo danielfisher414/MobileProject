@@ -172,7 +172,9 @@ class EditProfile extends Component {
                     value={this.state.password}/> */}
                     
                     <Button title="Change Profile" onPress={this.handleUpdateProfile}/>
-                    <Button style={styles.goBackBtn} title="Go Back" onPress={this.goBack}/>
+                    <View style={{marginTop:10}}>
+                    <Button title="Go Back" onPress={this.goBack}/>
+                    </View>
                 </View>
             </View>
         );
@@ -228,10 +230,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
 
     }
-    // goBackBtn:{
-    //     marginTop:20,
-    //     backgroundColor:'red',
-    // }
 });
 
 export default EditProfile;
