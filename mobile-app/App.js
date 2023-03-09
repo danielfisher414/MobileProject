@@ -40,12 +40,12 @@ const App = () => {
 
 
   return (
-    // <EditProfile/>
+    <EditProfile/>
 
-    <NavigationContainer>
-      {conversationId != null ? <Conversation Conversation screenName={conversationId}/> :
-      id == null ? <Navigation/>:<HomeTab/>}
-      </NavigationContainer>
+    // <NavigationContainer>
+    //   {conversationId != null ? <Conversation Conversation screenName={conversationId}/> :
+    //   id == null ? <Navigation/>:<HomeTab/>}
+    //   </NavigationContainer>
 
   );
 };

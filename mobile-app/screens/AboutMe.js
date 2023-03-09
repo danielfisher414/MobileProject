@@ -78,6 +78,11 @@ class AboutMe extends Component {
     }
   };
 
+  handleEditProfile = () =>{
+    const { navigation } = this.props;
+    navigation.navigate('EditProfile');
+  };
+  
   render() {
     return (
       <View style={styles.container}>
@@ -87,7 +92,7 @@ class AboutMe extends Component {
           </Text>
           <Text style={styles.email}>{this.state.email}</Text>
         </View>
-        <Button title="Edit Profile" onPress={this.editProfile}/>
+        <Button title="Edit Profile" onPress={this.handleEditProfile}/>
         <Button title="Logout" onPress={this.logout} />
       </View>
     );

@@ -16,6 +16,7 @@ import ConversationScreen from './screens/ConversationScreen';
 import ExitScreen from './screens/ExitScreen';
 // import AboutMe from './screens/CreateAccount';
 import { Ionicons } from '@expo/vector-icons';
+import EditProfile from './screens/EditProfile';
 
 
 const Stack = createNativeStackNavigator();
@@ -37,9 +38,7 @@ const Navigation = () => {
 const HomeTab= () => {
   return (
     <NavigationContainer independent={true}>
-            <Tab.Navigator
-
-      >
+            <Tab.Navigator>
       {/* <Tab.Screen name="Home" component={HomeScreen} 
               options={{
                 tabBarIcon: ({ color, size }) => (
@@ -64,12 +63,20 @@ const HomeTab= () => {
                       tabBarIcon: ({ color, size }) => (
                         <Ionicons name="person" color={color} size={size} />
                       ),
-                    }}/> 
+                    }}/>
+      <Tab.Screen name="EditProfile" component={EditProfile} 
+      options={() => ({
+      tabBarStyle: {
+        display: "none",
+      },
+      tabBarButton: () => null,
+    })}
+    /> 
       </Tab.Navigator>
     </NavigationContainer>
   );
 };
-
+// 
 
 const Conversation = ({ screenName }) => {
   return (
@@ -80,6 +87,17 @@ const Conversation = ({ screenName }) => {
         <Drawer.Screen name="Exit" component={ExitScreen}/>
       </Drawer.Navigator>
       </NavigationContainer>
+  );
+};
+
+const EditProfileScreen = () => {
+  return (
+    <NavigationContainer independent={true}>
+      <Stack.Navigator>
+        <Stack.Screen name="Profile" component={AboutMe} />
+        <Stack.Screen name="EditProfile" component={EditProfile} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 
