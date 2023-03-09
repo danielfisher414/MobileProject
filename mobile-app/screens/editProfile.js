@@ -54,7 +54,7 @@ class EditProfile extends Component {
 
     handleUpdateProfile = () => {
         fetch('http://localhost:3333/api/1.0.0/user/' + this.state.user_id, {
-            method: 'GET',
+            method: 'PATCH',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
@@ -64,29 +64,39 @@ class EditProfile extends Component {
                 first_name: this.state.first_name,
                 last_name: this.state.last_name,
                 email: this.state.email,
-                password: this.state.password,
+                // password: this.state.password,
               }),
         })
-            .then((response) => {
-                if (response.status === 200) {
-                    // Success
-                    return response.json(); // Return the JSON response
+        .then(response => {
+            if (response.status === 200) {
+                // Success
+                if (response.headers.get("Content-Type").indexOf("application/json") !== -1) {
+                    return response.json(); // Parse response body as JSON
                 } else {
-                    // Error
-                    throw new Error('Something went wrong');
+                    return response.text(); // Return response body as plain text
                 }
-            })
-            // .then((data) => {
-            //     console.log(data); // Handle the JSON response
-            //     this.setState({
-            //         first_name: data.first_name,
-            //         last_name: data.last_name,
-            //         email: data.email,
-            //     });
-            // })
-            // .catch((error) => {
-            //     console.error(error); // Handle the error
-            // });
+            } else {
+                // Error
+                throw new Error('Something went wrong');
+            }
+        })
+        .then(data => {
+            if (typeof data === "object") {
+                console.log(data); // Handle the JSON response
+                this.setState({
+                    first_name: data.first_name,
+                    last_name: data.last_name,
+                    email: data.email,
+                    
+                });
+                
+            } else {
+                console.log(data); // Handle the plain text response
+            }
+        })
+        .catch(error => {
+            console.error(error); // Handle the error
+        });
     };
 
     getUserInfo = () => {
@@ -131,32 +141,38 @@ class EditProfile extends Component {
         return (
             <View style={styles.container}>
                 
-                <Text style={styles.headerName}>Edit Profile</Text>
-                <Button title="Edit Profile" onPress={this.goBack}/>
+                {/* <Text style={styles.headerName}>Edit Profile</Text> */}
+                
                 <Image
                     style={styles.profilePic}
                     source={{ uri: 'https://www.ateneo.edu/sites/default/files/styles/large/public/2021-11/istockphoto-517998264-612x612.jpeg?itok=aMC1MRHJ' }}
                 />
-                <Text style={styles.name}>John Doe</Text>
+                <Text style={styles.name}>{this.state.first_name} {this.state.last_name}</Text>
                 <View style={styles.changeProfileInputs}>
+                <Text style={styles.btnTitle}>Title</Text>
                     <TextInput style={styles.editProfileInputs}
                      multiline={true} onChangeText={this.onChangeText} value={this.state.text}
                      placeholder='Drag Image or img link'
                     />
+                    <Text style={styles.btnTitle}>First Name</Text>
                     <TextInput style={styles.editProfileInputs} placeholder='first name' 
                                 onChangeText={this.handleFirstNameTextChange}
                                 value={this.state.first_name}/>
-
+<Text style={styles.btnTitle}>Last Name</Text>
                     <TextInput style={styles.editProfileInputs} placeholder='last name' 
                      onChangeText={this.handleFirstNameTextChange}
                      value={this.state.last_name}/>
+                     <Text style={styles.btnTitle}>Email</Text>
                     <TextInput style={styles.editProfileInputs} placeholder='email' 
                     onChangeText={this.handleFirstNameTextChange}
                     value={this.state.email}/>
+                    {/* <Text style={styles.btnTitle}>Password</Text>
                     <TextInput style={styles.editProfileInputs} placeholder='password' 
                     onChangeText={this.handleFirstNameTextChange}
-                    value={this.state.password}/>
-                    <Button title="Change Profile" />
+                    value={this.state.password}/> */}
+                    
+                    <Button title="Change Profile" onPress={this.handleUpdateProfile}/>
+                    <Button style={styles.goBackBtn} title="Go Back" onPress={this.goBack}/>
                 </View>
             </View>
         );
@@ -168,12 +184,12 @@ const styles = StyleSheet.create({
         backgroundColor:'white',
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: 20,
+        // justifyContent: 'center',
+        padding: 1,
     },
     headerName: {
         fontSize: 20,
-        marginBottom: 50,
+        marginBottom: 12,
         fontWeight: 'bold',
     },
     profilePic: {
@@ -181,6 +197,7 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 100,
         marginBottom: 20,
+        marginTop: 20,
     },
     name: {
         fontSize: 24,
@@ -197,16 +214,24 @@ const styles = StyleSheet.create({
         // borderColor:'black',
         // flexDirection: 'row',
         // justifyContent: 'space-between',
-        width: '60%',
+        width: '80%',
     },
     editProfileInputs: {
         borderWidth: 1,
         borderColor: 'black',
         borderRadius: 5,
-        marginBottom: 20,
+        marginBottom: 10,
         padding: 5,
         // width:'50%',
+    },
+    btnTitle:{
+    fontSize: 16,
+
     }
+    // goBackBtn:{
+    //     marginTop:20,
+    //     backgroundColor:'red',
+    // }
 });
 
 export default EditProfile;

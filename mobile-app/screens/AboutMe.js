@@ -80,7 +80,7 @@ class AboutMe extends Component {
 
   handleEditProfile = () =>{
     const { navigation } = this.props;
-    navigation.navigate('EditProfile');
+    navigation.navigate('Edit Profile');
   };
   
   render() {

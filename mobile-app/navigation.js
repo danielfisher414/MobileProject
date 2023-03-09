@@ -64,7 +64,7 @@ const HomeTab= () => {
                         <Ionicons name="person" color={color} size={size} />
                       ),
                     }}/>
-      <Tab.Screen name="EditProfile" component={EditProfile} 
+      <Tab.Screen name="Edit Profile" component={EditProfile} 
       options={() => ({
       tabBarStyle: {
         display: "none",
