@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Text, TextInput, View} from 'react-native';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble, Avatar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class ConversationScreen extends Component {
@@ -15,6 +15,8 @@ class ConversationScreen extends Component {
       session_token:'',
       chat_id:'',
       chat_name:'',
+      author_id:'',
+      showAvatar:'',
     };
   }
 
@@ -57,18 +59,35 @@ class ConversationScreen extends Component {
         }
       })
       .then((data) => {
+        
       const messages = data.messages.map(message => ({
+      
         _id: message.message_id,
         text: message.message,
         createdAt: new Date(message.timestamp),
+        
         user: {
-          _id: message.author.user_id,
-          name: message.author.first_name +" "+message.author.last_name,
           
+          id: message.author.user_id,
+          name: message.author.first_name +" "+message.author.last_name,
+            
         },
+        
       }));
-
+      
+      // this.setState({})
+      // alert("hello")
+      // console.log("first test: "+this.state.messages[0].user.author_id)
+      
+      // console.log(messages);
+      messages.forEach(message => {
+        console.log("element: "+message.user.author_id);
+        this.setState({ author_id: message.user.author_id});  
+      });
       this.setState({ messages });
+      
+
+      // console.log("im here: "+this.state.messages[0].user.author_id);
       })
       .catch((error) => {
         console.error(error.message); // Handle the error
@@ -82,8 +101,32 @@ class ConversationScreen extends Component {
     }));
   };
 
-  renderBubble(props) {
+  renderAvatar=(props)=> {
+    if(this.state.author_id==this.state.user_id){
+      return null;
+      
+    }else{
+      return (
+        <Avatar
+          {...props}
+          hide={'left'}
+          
+        />
+      );
+    };
+  };
+
+  renderBubble=(props)=> {
+    // alert(this.state.author_id);
+    if(this.state.author_id==this.state.user_id){
+      
     return (
+      <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+      }}
+      >
       <Bubble
         {...props}
         wrapperStyle={{
@@ -96,20 +139,73 @@ class ConversationScreen extends Component {
             color: 'black',
           },
         }}
+        position={'right'} //moves the position of the bubble
+        renderAvatar={() => null}
       />
+      </View>
     );
+      }else{
+        return (
+          <Bubble
+            {...props}
+            wrapperStyle={{
+              left: {
+                backgroundColor: '#cccccc',
+              },
+            }}
+            textStyle={{
+              left: {
+                color: 'black',
+              },
+            }}
+            position={'left'} //moves the position of the bubble
+          />
+        );
+      }
   }
 
   render() {
+    console.log("here-> :"+this.state.author_id);
+    
+    if(this.state.author_id==this.state.user_id){
+      return (
+      
+        <View style={{ backgroundColor: "white", flex: 1 }}>
+          {/* {alert(this.state.chat_id)} */}
+        <GiftedChat
+          messages={this.state.messages}
+          onSend={messages => this.onSend(messages)}
+          
+          // user={{
+          //   _id: 1,
+          // }}
+          // {_id ==this.chat_id}
+          renderBubble={this.renderBubble} // bubble render
+        
+          renderAvatar={null} // avatar comment this function for it to show
+          
+  
+        />
+        </View>
+      );
+    }
     return (
+      
       <View style={{ backgroundColor: "white", flex: 1 }}>
+        {/* {alert(this.state.chat_id)} */}
       <GiftedChat
         messages={this.state.messages}
         onSend={messages => this.onSend(messages)}
-        user={{
-          _id: 1,
-        }}
-        renderBubble={this.renderBubble}
+        
+        // user={{
+        //   _id: 1,
+        // }}
+        // {_id ==this.chat_id}
+        renderBubble={this.renderBubble} // bubble render
+      
+        renderAvatar={null} // avatar comment this function for it to show
+        
+
       />
       </View>
     );
