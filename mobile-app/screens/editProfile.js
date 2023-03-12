@@ -271,11 +271,11 @@ class EditProfile extends Component {
                         value={this.state.first_name} />
                     <Text style={styles.btnTitle}>Last Name</Text>
                     <TextInput style={styles.editProfileInputs} placeholder='last name'
-                        onChangeText={this.handleFirstNameTextChange}
+                        onChangeText={this.handleLastNameTextChange}
                         value={this.state.last_name} />
                     <Text style={styles.btnTitle}>Email</Text>
                     <TextInput style={styles.editProfileInputs} placeholder='email'
-                        onChangeText={this.handleFirstNameTextChange}
+                        onChangeText={this.handleEmailTextChange}
                         value={this.state.email} />
                     {/* <Text style={styles.btnTitle}>Password</Text>
                     <TextInput style={styles.editProfileInputs} placeholder='password' 
