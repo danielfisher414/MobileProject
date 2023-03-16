@@ -91,7 +91,9 @@ class Settings extends Component {
 
   getItem = (data,index) => {
     // console.log(this.state.data[index].title);
-    return this.state.data[index].title;
+    const { title, email,id } = this.state.data[index];
+    return { title, email,id };
+    
     // return this.state.data[index];
   };
   
@@ -139,7 +141,7 @@ class Settings extends Component {
     this.setState({searchQuery:''});
   };
 
-  addUserhandleOverlay = () => {
+  addUserFromChatHandleOverlay = () => {
     this.setState({ visible: !this.state.visible });
     
     this.getContacts();
@@ -217,6 +219,40 @@ class Settings extends Component {
       });
   };
 
+  deleteUserFromChat = (userId) => {
+    console.log(userId.toString());
+    console.log(this.state.chat_id);
+    console.log(this.state.session_token);
+    fetch('http://localhost:3333/api/1.0.0/chat/'+this.state.chat_id+'/user/'+userId.toString(), {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token,
+      },
+    })
+    .then(response => {
+     
+      if (response.status === 200) {
+        // Success
+  
+        return response; // Return the JSON response
+      } else {
+        // Error
+        
+        throw new Error('Something went wrong');
+      }
+    })
+    .then(data => {
+      console.log(data); // Handle the JSON response
+      
+    })
+    .catch(error => {
+      console.error(error.message); // Handle the error
+      // console.error(error.response); // Handle the error
+    });
+  };
+
   handleChatNameChange = () => {
     try {
 
@@ -282,6 +318,15 @@ class Settings extends Component {
     this.getContacts();
   };
 
+  handleAddUserToChat=(item)=>{
+    console.log(item+" "+" "+this.state.chat_id);
+
+  }
+  handleDeleteUserFromChat=(item)=>{
+    // console.log(item+" "+" "+this.state.chat_id);
+    // console.log(item);
+    this.deleteUserFromChat(item);
+  }
 
   // end of add user functions
 
@@ -296,7 +341,7 @@ class Settings extends Component {
           onChangeText={this.addUserNameTextChange}
           value={this.state.addUserName}
         />
-        <Button onPress={this.addUserhandleOverlay} title="add user" />
+        <Button onPress={this.addUserFromChatHandleOverlay} title="add user" />
 
         <Text>Remove a user from the chat</Text>
         <TextInput placeholder='Type Their Email'
@@ -338,18 +383,19 @@ class Settings extends Component {
         renderItem = {({ item }) => {
           // console.log("hi im a ITEM: "+item.title);
           return(
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => this.handleDeleteUserFromChat(item.id)}>
+
             <View style={{ padding: 10 }}>
-              <Item title={item} />
+            <Item title={item.title +"\n"+item.email}/>
             </View>
-            </TouchableOpacity>
+          </TouchableOpacity>
           );
         }}
-    keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
       />
     </SafeAreaView>
     
-              <Button title="Close" onPress={this.addUserhandleOverlay} />
+              <Button title="Close" onPress={this.addUserFromChatHandleOverlay} />
  
               </div>
         </Modal>

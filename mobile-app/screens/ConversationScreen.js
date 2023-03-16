@@ -8,7 +8,7 @@ class ConversationScreen extends Component {
   componentDidMount() {
     this.getChatInfo();
     // this.refreshInterval = setInterval(this.getChatInfo(), 1000);
-    this.refreshInterval = setInterval(this.getAllConversations, 1000); // refresh every 5 seconds
+    // this.refreshInterval = setInterval(this.getAllConversations, 1000); // refresh every 5 seconds
   }
 
   componentWillUnmount() {
