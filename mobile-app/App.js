@@ -5,6 +5,8 @@ import {Navigation, HomeTab,Conversation} from './navigation';
 import { NavigationContainer} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EditProfile from './screens/EditProfile';
+import Settings from './screens/Settings';
+import Contacts from './screens/Contacts';
 const App = () => {
   const [id, setId] = useState(null);
   const [conversationId, conversationSetId] = useState(null);
@@ -41,7 +43,8 @@ const App = () => {
 
   return (
     // <EditProfile/>
-
+    // <Settings/>
+    // <Contacts/>
     <NavigationContainer>
       {conversationId != null ? <Conversation Conversation screenName={conversationId}/> :
       id == null ? <Navigation/>:<HomeTab/>}

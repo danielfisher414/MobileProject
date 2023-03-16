@@ -141,9 +141,11 @@ class Chats extends Component{
           <Button title='Create Chat' onPress={this.handleOverlay}/>
 
           {/* all chats visable */}
-          <div id="allChatsBox" style={{overflow:'scroll', height:'100%',touchAction: 'none'}}>
+          <div id="allChatsBox" style={{ height:'100%',touchAction: 'none'}}>
+
           {this.state.chats.map((chat, index) => (
             <TouchableOpacity onPress={() => this.handleClickedOnChatName(chat,index)}>
+              
                <Text style={{ color: 'black', fontSize:'20px',textAlign:'center'}}>{chat}</Text>
             </TouchableOpacity>
           ))}

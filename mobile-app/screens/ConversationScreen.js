@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View,Modal,TouchableWithoutFeedback } from 'react-native';
 import { GiftedChat, Bubble, Avatar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 class ConversationScreen extends Component {
   componentDidMount() {
     this.getChatInfo();
+    // this.refreshInterval = setInterval(this.getChatInfo(), 1000);
     this.refreshInterval = setInterval(this.getAllConversations, 1000); // refresh every 5 seconds
   }
 
@@ -22,6 +24,7 @@ class ConversationScreen extends Component {
       chat_name: '',
       author_ids: null,
       showAvatar: '',
+      visible:false
     };
   }
 
@@ -165,8 +168,8 @@ class ConversationScreen extends Component {
     if (authorId == this.state.user_id) {
 
       return (
-
-
+        <TouchableWithoutFeedback onPress={() => this.handleBubblePress()}>
+          
         <Bubble
           {...props}
           // wrapperStyle={{
@@ -183,7 +186,7 @@ class ConversationScreen extends Component {
           // renderAvatar={() => null}
           style={{ marginRight: 60, marginBottom: 10 }} // add marginRight style
         />
-
+        </TouchableWithoutFeedback>
       );
     } else {
 
@@ -210,7 +213,16 @@ class ConversationScreen extends Component {
     }
   }
 
+  // handleOverlay =() =>{
   
+  //   this.setState({ visible: !this.state.visible });
+     
+  // };
+  
+  handleBubblePress() {
+    this.setState({ visible: true });
+  }
+
 
   render() {
     // console.log("here-> :"+this.state.author_id);
@@ -222,25 +234,22 @@ class ConversationScreen extends Component {
       <View style={{ backgroundColor: "white", flex: 1 }}>
         {/* {alert(this.state.chat_id)} */}
 
+        {/* <TouchableWithoutFeedback onPress={this.handleOverlay}> */}
         <GiftedChat
 
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
-          
-          // user={{
-
-          //     // id: message.author.user_id,
-          //     name: message.author.first_name + " " + message.author.last_name,
-
-          // }}
-
           renderBubble={this.renderBubble} // bubble render
+          
           renderAvatar={this.renderAvatar}
           // showUserAvatar={true}
           // renderMessage={this.renderMessage}
 
-
         />
+        <Modal animationType="fade" transparent={true} visible={this.state.visible}>
+        <Text>This is an overlay</Text>
+        </Modal>
+        {/* </TouchableWithoutFeedback> */}
       </View>
     );
 
