@@ -1,6 +1,13 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View, Button, Alert,Modal, TouchableOpacity} from 'react-native';
+import { Text, TextInput, View, Button, Alert,Modal, TouchableOpacity,SafeAreaView,VirtualizedList,StyleSheet} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+const Item = ({ title }) => (
+  <View style={styles.chatContaier}>
+    <Text style={styles.chatTitle}>{title}</Text>
+  </View>
+);
 
 class Chats extends Component{
   componentDidMount(){
@@ -8,7 +15,7 @@ class Chats extends Component{
   }
   constructor(props){
     super(props);
-    this.state={user_id:'',session_token:'',visible:false,chatName:'',chats:[]};
+    this.state={user_id:'',session_token:'',visible:false,chatName:'',chats:[],chatsID:[]};
     this.getUserInfo = this.getUserInfo.bind(this);
   }
   
@@ -48,26 +55,39 @@ class Chats extends Component{
           throw new Error('Something went wrong');
         }
       })
-      .then(data => {
-        data.forEach(value=>{
-          // let name = value.name;
-          this.handleShowAllChats(value.name);
-        })
-        console.log(data); // Handle the JSON response
-        
+      .then((data) => {
+        console.log("data: "+data)
+        const newChat  = data.map((item) =>( {
+          title:item.name,
+          id: item.chat_id,
+          last_message: item.last_message.message,
+          // email:member.email
+        }));
+        this.setState(prevState=>({
+          chats: [...prevState.chats, ...newChat],
+        }))
+        console.log(this.state.chats); // Use this.state.chats instead of prevState.chats
       })
       .catch(error => {
         console.error(error.message); // Handle the error
         // console.error(error.response); // Handle the error
       });
   };
+  
 
-  handleShowAllChats = (element) => {
-    // Update the state with the new element
+  handleShowAllChats = (element, elementId) => {
+    // Create a new object that includes both the chat and its ID
+    const newChat = {
+      chat: element,
+      chatId: elementId,
+    };
+  
+    // Update the state with the new chat and chat ID
     this.setState(prevState => ({
-      chats: [...prevState.chats, element]
-      
+      chats: [...prevState.chats, newChat],
+      chatsID: [...prevState.chatsID, elementId],
     }));
+    console.log(chats)
   };
 
   handleCreateChat = () =>{
@@ -113,7 +133,7 @@ class Chats extends Component{
     this.setState({ chatName: newtext })
   };
   handleClickedOnChatName = (chat,index)=>{
-    console.log('Clicked:', index+=1,chat)
+    console.log('Clicked:', index,chat) //THIS IS WRONG URGENT FIX!!!!!!!1
     this.handleChatScreen(index,chat);
   };
 
@@ -134,6 +154,18 @@ class Chats extends Component{
     }
   };
 
+  getChatItemCount = () => {
+    return this.state.chats.length;
+  };
+
+  getChatItem = (data,index) => {
+    // console.log(this.state.data[index].title);
+    const { title,id,last_message } = this.state.chats[index];
+    return { title, id,last_message };
+    
+    // return this.state.data[index];
+  };
+
   render(){
     return(
         <View>
@@ -141,15 +173,40 @@ class Chats extends Component{
           <Button title='Create Chat' onPress={this.handleOverlay}/>
 
           {/* all chats visable */}
-          <div id="allChatsBox" style={{ height:'100%',touchAction: 'none'}}>
+          {/* <div id="allChatsBox" style={{ height:'100%',touchAction: 'none'}}>
 
           {this.state.chats.map((chat, index) => (
             <TouchableOpacity onPress={() => this.handleClickedOnChatName(chat,index)}>
-              
-               <Text style={{ color: 'black', fontSize:'20px',textAlign:'center'}}>{chat}</Text>
+            
+               <Text style={{ color: 'black', fontSize:'20px',textAlign:'center'}}>{chat.chat}</Text>
             </TouchableOpacity>
           ))}
-        </div>
+        </div> */}
+
+<div >
+<SafeAreaView style={styles.container}>
+    <VirtualizedList 
+        data={this.state.chats}
+        getItemCount={this.getChatItemCount}
+        getItem={this.getChatItem}
+        
+        renderItem = {({ item }) => {
+          console.log("ITEM HERE: "+item.title);
+          // console.log("ITEM HERE: "+item.id);
+          // console.log("ITEM HERE: "+item.last_message);
+          return(
+          <TouchableOpacity onPress={() => this.handleClickedOnChatName(item.title,item.id)}>
+
+            <View style={{ padding: 10 }}>
+            <Item title={item.title +"\n"+item.id}/>
+            </View>
+          </TouchableOpacity>
+          );
+        }}
+        keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
+      />
+    </SafeAreaView>
+    </div>
           {/* end all chats visable */}
 
               {/* OVERLAY */}
@@ -173,5 +230,63 @@ class Chats extends Component{
     );
   }
 }
+
+const styles = StyleSheet.create({
+  chatContaier:{
+    flex: 1,
+      backgroundColor: 'white',
+  padding: 10,
+  borderRadius: 5,
+  boxShadow: '0px 0px 5px 0px rgba(0,0,0,0.2)'
+  },
+  container: {
+    textAlign:'center',
+    flex: 1,
+    // marginTop: StatusBar.currentHeight,
+    // width:'50%',
+    height:'18%',
+    justifyContent:'center',
+    alignContent:'center',
+    
+  },
+    chatTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 10,
+    marginHorizontal: 20,
+  },
+  modelContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 80,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '80%',
+    height: '90%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  item: {
+    backgroundColor: '#f9c2ff',
+    height: 150,
+    justifyContent: 'center',
+    marginVertical: 8,
+    marginHorizontal: 16,
+    padding: 20,
+  },
+  title: {
+    fontSize: 32,
+  },
+});
 
 export default Chats;
