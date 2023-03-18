@@ -281,11 +281,14 @@ class EditProfile extends Component {
                     <TextInput style={styles.editProfileInputs} placeholder='password' 
                     onChangeText={this.handleFirstNameTextChange}
                     value={this.state.password}/> */}
+                    <div style={styles.profileButtons}>
                     <Button title='Change Password' onPress={this.handleOverlay} />
                     <Button title="Change Profile" onPress={this.handleUpdateProfile} />
+                    </div>
                     <View style={{ marginTop: 10 }}>
                         <Button title="Go Back" onPress={this.goBack} />
                     </View>
+                    
                 </View>
 
                 {/* OVERLAY */}
@@ -338,13 +341,14 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 100,
-        marginBottom: 20,
-        marginTop: 20,
+        // marginBottom: 20,
+        marginTop: 5,
     },
     name: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 20,
+        marginTop:10,
+        // marginBottom: 20,
     },
     changeProfileInputs: {
         display: 'flex',
@@ -357,6 +361,19 @@ const styles = StyleSheet.create({
         // flexDirection: 'row',
         // justifyContent: 'space-between',
         width: '80%',
+    },
+    profileButtons: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignContent: 'flex-start',
+        // justifyContent: 'flex-start',
+        justifyContent: 'space-evenly',
+        
+        // borderWidth:1,
+        // borderColor:'black',
+        // flexDirection: 'row',
+        // justifyContent: 'space-between',
+        // width: '80%',
     },
     editProfileInputs: {
         borderWidth: 1,
