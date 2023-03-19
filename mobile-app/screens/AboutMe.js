@@ -4,7 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class AboutMe extends Component {
   componentDidMount() {
-    this.getUserInfo();
+    this.refreshInterval = setInterval(this.getUserInfo(), 1000);
+    this.refreshInterval = setInterval(this.handleGetUserPhoto(), 1000);
   }
 
   constructor(props) {
@@ -15,6 +16,7 @@ class AboutMe extends Component {
       email: '',
       user_id: '',
       session_token: '',
+      userProfilePic: 'https://www.ateneo.edu/sites/default/files/styles/large/public/2021-11/istockphoto-517998264-612x612.jpeg?itok=aMC1MRHJ',
     };
     this.getUserInfo = this.getUserInfo.bind(this);
   }
@@ -59,6 +61,7 @@ class AboutMe extends Component {
         if (user_id && session_token) {
           this.setState({ user_id, session_token }, () => {
             this.setUserInfo();
+            this.handleGetUserPhoto();
           });
         } else {
           // handle missing values
@@ -78,6 +81,50 @@ class AboutMe extends Component {
     }
   };
 
+
+  handleGetUserPhoto = () => {
+    // Create a new FormData object
+    // console.log(file)
+
+
+
+    // Make a POST request to upload the file
+    fetch('http://localhost:3333/api/1.0.0/user/' + this.state.user_id + '/photo', {
+        method: 'GET',
+        headers: {
+            Accept: 'image/png',
+            'Content-Type': 'image/png',
+            'X-Authorization': this.state.session_token,
+        },
+    })
+        .then(response => {
+
+            if (response.status === 200) {
+                // Success
+                // alert(response.blob());
+                return response.blob(); // Return the JSON response
+            } else {
+                // Error
+
+                throw new Error('Something went wrong');
+            }
+        })
+        .then(data => {
+            console.log("data here: " + data); // Handle the JSON response
+            
+            
+            const imageUrl = URL.createObjectURL(data);
+            console.log(imageUrl);
+            
+            this.setState({ userProfilePic: imageUrl })
+            
+        })
+        .catch(error => {
+            console.error(error.message); // Handle the error
+            // console.error(error.response); // Handle the error
+        });
+};
+
   handleEditProfile = () =>{
     const { navigation } = this.props;
     navigation.navigate('Edit Profile');
@@ -89,7 +136,7 @@ class AboutMe extends Component {
         <View style={styles.innerContainer}>
                   <Image
               style={styles.profilePic}
-              source={{ uri: 'https://www.ateneo.edu/sites/default/files/styles/large/public/2021-11/istockphoto-517998264-612x612.jpeg?itok=aMC1MRHJ' }}
+              source={{ uri: this.state.userProfilePic }}
           />
           </View>
         <View style={styles.aboutContainer}>

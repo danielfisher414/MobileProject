@@ -6,6 +6,7 @@ import passwordValidator from 'password-validator';
 class EditProfile extends Component {
     componentDidMount() {
         this.getUserInfo();
+        
     }
 
     constructor(props) {
@@ -21,6 +22,7 @@ class EditProfile extends Component {
             testOriginalPassword: '',
             newPassword: '',
             newPassword2: '',
+            userProfilePic: 'https://www.ateneo.edu/sites/default/files/styles/large/public/2021-11/istockphoto-517998264-612x612.jpeg?itok=aMC1MRHJ',
         };
         this.getUserInfo = this.getUserInfo.bind(this);
     }
@@ -90,7 +92,7 @@ class EditProfile extends Component {
                         first_name: data.first_name,
                         last_name: data.last_name,
                         email: data.email,
-                        
+
                     });
 
                 } else {
@@ -102,52 +104,52 @@ class EditProfile extends Component {
             });
     };
     handleUpdatePassword = () => {
-        
-        if(this.state.newPassword==this.state.newPassword2){
 
-            if(this.validatePassword(this.state.newPassword)==true){
-            
-            this.setState({password:this.state.newPassword});
+        if (this.state.newPassword == this.state.newPassword2) {
 
-            fetch('http://localhost:3333/api/1.0.0/user/' + this.state.user_id, {
-                method: 'PATCH',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-Authorization': this.state.session_token,
-                },
-                body: JSON.stringify({
-                    password: this.state.password
-                }),
-            })
-                .then(response => {
-                    if (response.status === 200) {
-                        // Success
-                        if (response.headers.get("Content-Type").indexOf("application/json") !== -1) {
-                            return response.json(); // Parse response body as JSON
+            if (this.validatePassword(this.state.newPassword) == true) {
+
+                this.setState({ password: this.state.newPassword });
+
+                fetch('http://localhost:3333/api/1.0.0/user/' + this.state.user_id, {
+                    method: 'PATCH',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Authorization': this.state.session_token,
+                    },
+                    body: JSON.stringify({
+                        password: this.state.password
+                    }),
+                })
+                    .then(response => {
+                        if (response.status === 200) {
+                            // Success
+                            if (response.headers.get("Content-Type").indexOf("application/json") !== -1) {
+                                return response.json(); // Parse response body as JSON
+                            } else {
+                                return response.text(); // Return response body as plain text
+                            }
                         } else {
-                            return response.text(); // Return response body as plain text
+                            // Error
+                            throw new Error('Something went wrong');
                         }
-                    } else {
-                        // Error
-                        throw new Error('Something went wrong');
-                    }
-                })
-                .then(data => {
-                    if (typeof data === "object") {
-                        console.log(data); // Handle the JSON response
-                        this.setState({
-                            password: data.password
-                            
-                        });
-    
-                    } else {
-                        console.log(data); // Handle the plain text response
-                    }
-                })
-                .catch(error => {
-                    console.error(error); // Handle the error
-                });
+                    })
+                    .then(data => {
+                        if (typeof data === "object") {
+                            console.log(data); // Handle the JSON response
+                            this.setState({
+                                password: data.password
+
+                            });
+
+                        } else {
+                            console.log(data); // Handle the plain text response
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error); // Handle the error
+                    });
 
             }
         }
@@ -163,6 +165,7 @@ class EditProfile extends Component {
                 if (user_id && session_token) {
                     this.setState({ user_id, session_token }, () => {
                         this.setUserInfo();
+                        this.handleGetUserPhoto();
                     });
                 } else {
                     // handle missing values
@@ -202,7 +205,7 @@ class EditProfile extends Component {
     handleFirstNewPassword = (newtext) => {
         this.setState({ newPassword: newtext })
     };
-    
+
     handle2ndNewPassword = (newtext) => {
         this.setState({ newPassword2: newtext })
     };
@@ -211,42 +214,128 @@ class EditProfile extends Component {
         this.setState({ testOriginalPassword: newtext })
     };
 
-    handleChangePassword=()=>{
+    handleChangePassword = () => {
         // console.log(this.state.testOriginalPassword);
         // console.log(this.state.password);
         // if(this.state.testOriginalPassword==this.state.password){
-            console.log(2);
-            if(this.state.newPassword==this.state.newPassword2){
-                console.log(3);
-                if(this.validatePassword(this.state.newPassword)==true){
-                    console.log(4);
-                this.setState({password:this.state.newPassword});
+        console.log(2);
+        if (this.state.newPassword == this.state.newPassword2) {
+            console.log(3);
+            if (this.validatePassword(this.state.newPassword) == true) {
+                console.log(4);
+                this.setState({ password: this.state.newPassword });
                 this.handleUpdatePassword;
                 console.log(5);
-                }
             }
+        }
         // }
     };
 
     validatePassword = (password) => {
         const schema = new passwordValidator();
-    
+
         schema
-          .is().min(8)  // Minimum length 8
-          .is().max(100)  // Maximum length 100
-          .has().uppercase()  // Must have uppercase letters
-          .has().lowercase()  // Must have lowercase letters
-          .has().digits()  // Must have digits
-          .has().symbols()
-          .has().not().spaces()  // Should not have spaces
-          .is().not().oneOf(['Passw0rd', 'Password123']);  // Blacklist these values
-    
+            .is().min(8)  // Minimum length 8
+            .is().max(100)  // Maximum length 100
+            .has().uppercase()  // Must have uppercase letters
+            .has().lowercase()  // Must have lowercase letters
+            .has().digits()  // Must have digits
+            .has().symbols()
+            .has().not().spaces()  // Should not have spaces
+            .is().not().oneOf(['Passw0rd', 'Password123']);  // Blacklist these values
+
         if (schema.validate(password)) {
-          return true;
+            return true;
         } else {
-          return false;
+            return false;
         }
-      }
+    }
+
+    handleFileUpload = (file) => {
+        // Create a new FormData object
+        // console.log(file)
+
+
+        // const formData = new FormData();
+        // formData.append('file', file);
+        
+        // console.log("formData: " + file.toString());
+        // Make a POST request to upload the file
+        fetch('http://localhost:3333/api/1.0.0/user/' + this.state.user_id + '/photo', {
+            method: 'POST',
+            headers: {
+                Accept: '/',
+                'Content-Type': 'image/png',
+                'X-Authorization': this.state.session_token,
+            },
+            body: file
+        })
+            .then(response => {
+
+                if (response.status === 200) {
+                    // Success
+                    
+                    this.handleGetUserPhoto();
+                    return response; // Return the JSON response
+                } else {
+                    // Error
+
+                    throw new Error('Something went wrong');
+                }
+            })
+            .then(data => {
+                console.log(data); // Handle the JSON response
+                
+
+            })
+            .catch(error => {
+                console.error(error.message); // Handle the error
+                // console.error(error.response); // Handle the error
+            });
+    };
+
+    handleGetUserPhoto = () => {
+        // Create a new FormData object
+        // console.log(file)
+
+
+
+        // Make a POST request to upload the file
+        fetch('http://localhost:3333/api/1.0.0/user/' + this.state.user_id + '/photo', {
+            method: 'GET',
+            headers: {
+                Accept: 'image/png',
+                'Content-Type': 'image/png',
+                'X-Authorization': this.state.session_token,
+            },
+        })
+            .then(response => {
+
+                if (response.status === 200) {
+                    // Success
+                    // alert(response.blob());
+                    return response.blob(); // Return the JSON response
+                } else {
+                    // Error
+
+                    throw new Error('Something went wrong');
+                }
+            })
+            .then(data => {
+                console.log("data here: " + data); // Handle the JSON response
+                
+                
+                const imageUrl = URL.createObjectURL(data);
+                console.log(imageUrl);
+                
+                this.setState({ userProfilePic: imageUrl })
+            })
+            .catch(error => {
+                console.error(error.message); // Handle the error
+                // console.error(error.response); // Handle the error
+            });
+    };
+
 
     render() {
         return (
@@ -256,15 +345,22 @@ class EditProfile extends Component {
 
                 <Image
                     style={styles.profilePic}
-                    source={{ uri: 'https://www.ateneo.edu/sites/default/files/styles/large/public/2021-11/istockphoto-517998264-612x612.jpeg?itok=aMC1MRHJ' }}
+                    source={{ uri: this.state.userProfilePic }}
                 />
                 <Text style={styles.name}>{this.state.first_name} {this.state.last_name}</Text>
                 <View style={styles.changeProfileInputs}>
-                    <Text style={styles.btnTitle}>Title</Text>
-                    <TextInput style={styles.editProfileInputs}
+                    <div style={styles.pictureBox}>
+                        <Text style={styles.btnTitle}>Choose an img</Text>
+                        {/* <TextInput style={styles.editProfileInputs}
                         multiline={true} onChangeText={this.onChangeText} value={this.state.text}
                         placeholder='Drag Image or img link'
-                    />
+                    /> */}
+                        <input
+                            style={{ margin: 0, padding: 0 }}
+                            type="file"
+                            onChange={(event) => this.handleFileUpload(event.target.files[0])}
+                        />
+                    </div>
                     <Text style={styles.btnTitle}>First Name</Text>
                     <TextInput style={styles.editProfileInputs} placeholder='first name'
                         onChangeText={this.handleFirstNameTextChange}
@@ -282,13 +378,13 @@ class EditProfile extends Component {
                     onChangeText={this.handleFirstNameTextChange}
                     value={this.state.password}/> */}
                     <div style={styles.profileButtons}>
-                    <Button title='Change Password' onPress={this.handleOverlay} />
-                    <Button title="Change Profile" onPress={this.handleUpdateProfile} />
+                        <Button title='Change Password' onPress={this.handleOverlay} />
+                        <Button title="Change Profile" onPress={this.handleUpdateProfile} />
                     </div>
                     <View style={{ marginTop: 10 }}>
                         <Button title="Go Back" onPress={this.goBack} />
                     </View>
-                    
+
                 </View>
 
                 {/* OVERLAY */}
@@ -347,7 +443,7 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginTop:10,
+        marginTop: 10,
         // marginBottom: 20,
     },
     changeProfileInputs: {
@@ -362,13 +458,20 @@ const styles = StyleSheet.create({
         // justifyContent: 'space-between',
         width: '80%',
     },
+    pictureBox: {
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        // alignContent:'center',
+        // textAlign:'center',
+    },
     profileButtons: {
         display: 'flex',
         flexDirection: 'row',
         alignContent: 'flex-start',
         // justifyContent: 'flex-start',
         justifyContent: 'space-evenly',
-        
+
         // borderWidth:1,
         // borderColor:'black',
         // flexDirection: 'row',

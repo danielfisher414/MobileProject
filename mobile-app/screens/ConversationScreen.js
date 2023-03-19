@@ -6,8 +6,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class ConversationScreen extends Component {
   componentDidMount() {
-    this.getChatInfo();
-    // this.refreshInterval = setInterval(this.getChatInfo(), 1000);
+    // this.getChatInfo();
+    this.refreshInterval = setInterval(this.getChatInfo(), 100);
     // this.refreshInterval = setInterval(this.getAllConversations, 1000); // refresh every 5 seconds
   }
 
