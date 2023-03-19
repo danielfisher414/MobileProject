@@ -34,7 +34,7 @@ class Contact extends Component {
   }
   constructor(props) {
     super(props);
-    this.state = { user_id: '', session_token: '', searchQuery: '', friends: "", contactData: "",contactSearchOptions:false, contactOptions: false, searchForContacts: false,selectedContact:'' };
+    this.state = { user_id: '', session_token: '', searchQuery: '', friends: "", blockedContactData:'',contactData: "", searchBlockedUsers: false, contactSearchOptions: false, contactOptions: false, blockedUserOptions:false,searchForContacts: false, selectedContact: '' };
     this.getUserInfo = this.getUserInfo.bind(this);
   }
 
@@ -48,6 +48,7 @@ class Contact extends Component {
           this.setState({ user_id, session_token });
           this.handleSearchUsers();
           this.handleUsersContact();
+          this.handleSearchBlockedUsers();
         } else {
           // handle missing values
           console.log(error);
@@ -151,6 +152,120 @@ class Contact extends Component {
     return { title, email, id };
   };
 
+  // START OF RECIEVING BLOCKED USERS
+
+  handleSearchBlockedUsers = () => {
+    // this.removeUserContact();
+    fetch('http://localhost:3333/api/1.0.0/blocked', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token
+      },
+    })
+      .then(response => {
+        if (response.status === 200) {
+          // Success
+
+          return response.json(); // Return the JSON response
+        } else {
+          // Error
+          throw new Error('Something went wrong');
+        }
+      })
+      .then((data) => {
+        console.log(data); // Handle the JSON response
+        // create an array of contacts available
+        const contacts = data.map((item) => ({
+          id: item.user_id,
+          title: `${item.first_name} ${item.last_name}`,
+          email: item.email,
+        }));
+        this.setState({
+          blockedContactData: contacts,
+        });
+        console.log("blocked contacts: "+this.state.blockedContactData);
+      })
+      .catch(error => {
+        console.error(error); // Handle the error
+      });
+  }
+
+  getBlockedItemCount = () => {
+    return this.state.blockedContactData.length;
+  };
+
+  getBlockedItem = (contactData, index) => {
+    const { title, email, id } = this.state.blockedContactData[index];
+    return { title, email, id };
+  };
+
+  // END OF Recieving BLOCKED USERS
+
+  // START of BLOCKING USERS
+  blockUser = () => {
+
+    fetch('http://localhost:3333/api/1.0.0/user/'+this.state.selectedContact+'/block', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token
+      },
+    })
+      .then(response => {
+        if (response.status === 200) {
+          // Success
+          console.log('success')
+          return response.json(); // Return the JSON response
+        } else {
+          // Error
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        console.log(data); // Handle the JSON response
+
+      })
+      .catch(error => {
+        console.error(error.message); // Handle the error
+        // console.error(error.response); // Handle the error
+      });
+  };
+  // END of BLOCKING USERS
+
+  // START OF UNBLOCKING USERS
+  unBlockUser = () => {
+
+    fetch('http://localhost:3333/api/1.0.0/user/'+this.state.selectedContact+'/block', {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token
+      },
+    })
+      .then(response => {
+        if (response.status === 200) {
+          // Success
+          console.log('success')
+          return response.json(); // Return the JSON response
+        } else {
+          // Error
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        console.log(data); // Handle the JSON response
+
+      })
+      .catch(error => {
+        console.error(error.message); // Handle the error
+        // console.error(error.response); // Handle the error
+      });
+  };
+  // END OF UNBLOCKING USERS
 
   searchFilterFunction = (text) => {
     this.setState({
@@ -172,23 +287,95 @@ class Contact extends Component {
     this.setState({ searchForContacts: !this.state.searchForContacts });
   };
 
-  handleOverlayOptions = (contact) => {
-    console.log(contact);
-    this.setState({ selectedContact:contact, contactOptions: !this.state.contactOptions });
-  };
-  handleOverlayUserOptions= (contact) => {
-    console.log(contact);
-    this.setState({ selectedContact:contact, contactSearchOptions: !this.state.contactSearchOptions });
-  };
-  handleBlockContact=()=>{
-    console.log('block test: '+this.state.selectedContact);
-  };
-  handleRemoveContact=()=>{
-    console.log('remove test: '+this.state.selectedContact);
+  handleSearchForBlockedUsers = () => {
+    this.setState({ searchBlockedUsers: !this.state.searchBlockedUsers });
   };
 
-  handleAddContact=()=>{
-    console.log('add test: '+this.state.selectedContact);
+  handleOverlayOptions = (contact) => {
+    console.log(contact);
+    this.setState({ selectedContact: contact, contactOptions: !this.state.contactOptions });
+  };
+  handleblockedUserOverlayOptions = (contact) => {
+    console.log(contact);
+    this.setState({ selectedContact: contact, blockedUserOptions: !this.state.blockedUserOptions });
+  };
+  handleOverlayUserOptions = (contact) => {
+    console.log(contact);
+    this.setState({ selectedContact: contact, contactSearchOptions: !this.state.contactSearchOptions });
+  };
+  handleBlockContact = () => {
+    console.log('block test: ' + this.state.selectedContact);
+    this.blockUser();
+  };
+  handleRemoveContact = () => {
+    console.log('remove test: ' + this.state.selectedContact);
+    this.removeContactUser();
+  };
+
+  removeContactUser = () => {
+
+    fetch('http://localhost:3333/api/1.0.0/user/' + this.state.selectedContact + '/contact', {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token
+      },
+    })
+      .then(response => {
+        if (response.status === 200) {
+          // Success
+          console.log('success')
+          return response.json(); // Return the JSON response
+        } else {
+          // Error
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        console.log(data); // Handle the JSON response
+
+      })
+      .catch(error => {
+        console.error(error.message); // Handle the error
+        // console.error(error.response); // Handle the error
+      });
+  };
+
+  addContactUser = () => {
+
+    fetch('http://localhost:3333/api/1.0.0/user/' + this.state.selectedContact + '/contact', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token
+      },
+    })
+      .then(response => {
+        if (response.status === 200) {
+          // Success
+          console.log('success')
+          return response.json(); // Return the JSON response
+        } else {
+          // Error
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        console.log(data); // Handle the JSON response
+
+      })
+      .catch(error => {
+        console.error(error.message); // Handle the error
+        // console.error(error.response); // Handle the error
+      });
+  };
+
+
+  handleAddContact = () => {
+    console.log('add test: ' + this.state.selectedContact);
+    this.addContactUser();
   };
 
   render() {
@@ -197,6 +384,7 @@ class Contact extends Component {
 
         <div >
           <Button onPress={this.handleSearchForContacts} title='Search for contacts' />
+          <Button onPress={this.handleSearchForBlockedUsers} title='View Blocked Users' />
           {/* <Modal transparent={true}> */}
           <div style={styles.modelContainer}>
 
@@ -212,7 +400,7 @@ class Contact extends Component {
                 renderItem={({ item }) => {
                   console.log(item);
                   return (
-                    <TouchableOpacity onPress={()=>this.handleOverlayOptions(item.id)}>
+                    <TouchableOpacity onPress={() => this.handleOverlayOptions(item.id)}>
                       <View style={{ padding: 10 }}>
                         <Item title={item.title + "\n" + item.email} />
                         {/* <Text>{item.email}</Text> */}
@@ -251,7 +439,7 @@ class Contact extends Component {
 
                 if (item.id == this.state.user_id) { return null; } else {
                   return (
-                    <TouchableOpacity onPress={()=>this.handleOverlayUserOptions(item.id)}>
+                    <TouchableOpacity onPress={() => this.handleOverlayUserOptions(item.id)}>
                       <View style={{ padding: 10 }}>
                         <Item title={item.title + "\n" + item.email} />
                         {/* <Text>{item.email}</Text> */}
@@ -266,26 +454,77 @@ class Contact extends Component {
 
           </SafeAreaView>
         </Modal>
+
+        {/* model overlay for viewing blocked users */}
+        <Modal animationType="fade" transparent={false} visible={this.state.searchBlockedUsers}>
+          {/* ALL CONTACTS DIV BOX */}
+          <Button title='Close' onPress={this.handleSearchForBlockedUsers} />
+          <SafeAreaView style={styles.container}>
+
+            <VirtualizedList
+              data={this.state.blockedContactData}
+              getItemCount={this.getBlockedItemCount}
+              getItem={this.getBlockedItem}
+
+              renderItem={({ item }) => {
+
+                if (item.id == this.state.user_id) { return null; } else {
+                  return (
+                    <TouchableOpacity onPress={() => this.handleblockedUserOverlayOptions(item.id)}>
+                      <View style={{ padding: 10 }}>
+                        <Item title={item.title + "\n" + item.email} />
+                        {/* <Text>{item.email}</Text> */}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                };
+              }}
+
+              keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
+            />
+
+          </SafeAreaView>
+        </Modal>
+        {/* END of model overlay for viewing blocked users */}
+
         <div >
           <Modal style={styles.optionsContainer} animationType="fade" transparent={true} visible={this.state.contactOptions}>
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
               <View style={{ backgroundColor: 'white', padding: 60 }}>
-                <Button onPress={this.handleBlockContact} title='Block Contact'/>
-                <Button onPress={this.handleRemoveContact} title='Remove Contact'/>
-                <Button title='Close' onPress={this.handleOverlayOptions}/>
+                <div style={styles.optionButtons}>
+                  <Button onPress={this.handleBlockContact} title='Block Contact' />
+                  <Button onPress={this.handleRemoveContact} title='Remove Contact' />
+                </div>
+                <Button title='Close' onPress={this.handleOverlayOptions} />
               </View>
             </View>
           </Modal>
         </div>
+
+        <div >
+          <Modal style={styles.optionsContainer} animationType="fade" transparent={true} visible={this.state.blockedUserOptions}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+              <View style={{ backgroundColor: 'white', padding: 60 }}>
+                <div style={styles.optionButtons}>
+                  <Button onPress={this.unBlockUser} title='Unblock Contact' />
+                </div>
+                <Button title='Close' onPress={this.handleblockedUserOverlayOptions} />
+              </View>
+            </View>
+          </Modal>
+        </div>
+
         {/* this.state.contactSearchOptions */}
         <div >
           <Modal style={styles.optionsContainer} animationType="fade" transparent={true} visible={this.state.contactSearchOptions}>
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
               <View style={{ backgroundColor: 'white', padding: 60 }}>
-                <Button onPress={this.handleAddContact} title='Add Contact'/>
-                <Button onPress={this.handleBlockContact} title='Block Contact'/>
+                <div style={styles.optionButtons}>
+                  <Button onPress={this.handleAddContact} title='Add Contact' />
+                  <Button onPress={this.handleBlockContact} title='Block Contact' />
+                </div>
                 {/* <Button onPress={this.handleRemoveContact} title='Remove Contact'/> */}
-                <Button title='Close' onPress={this.handleOverlayUserOptions}/>
+                <Button title='Close' onPress={this.handleOverlayUserOptions} />
               </View>
             </View>
           </Modal>
@@ -351,6 +590,17 @@ const styles = StyleSheet.create({
     height: 200,
     backgroundColor: 'blue',
   },
+  btnTitle: {
+    fontSize: 16,
+  },
+  optionButtons: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignContent: 'flex-start',
+    margin: 10,
+    // justifyContent: 'flex-start',
+    justifyContent: 'space-evenly',
+  }
 });
 
 export default Contact;
