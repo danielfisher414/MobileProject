@@ -169,7 +169,7 @@ class Chats extends Component{
   render(){
     return(
         <View>
-          <Text>Chat</Text>
+         
           <Button title='Create Chat' onPress={this.handleOverlay}/>
 
           {/* all chats visable */}
@@ -198,7 +198,7 @@ class Chats extends Component{
           <TouchableOpacity onPress={() => this.handleClickedOnChatName(item.title,item.id)}>
 
             <View style={{ padding: 10 }}>
-            <Item title={item.title +"\n"+item.id}/>
+            <Item title={item.title}/>
             </View>
           </TouchableOpacity>
           );
@@ -241,10 +241,10 @@ const styles = StyleSheet.create({
   },
   container: {
     textAlign:'center',
-    flex: 1,
+    // flex: 1,
     // marginTop: StatusBar.currentHeight,
     // width:'50%',
-    height:'18%',
+    height:'25%',
     justifyContent:'center',
     alignContent:'center',
     
@@ -286,6 +286,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
+    
   },
 });
 

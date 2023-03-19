@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View, Button, Alert, Modal,SearchBar,FlatList, VirtualizedList,SafeAreaView,StatusBar,TouchableOpacity,StyleSheet  } from 'react-native';
+import { Text, TextInput, View, Button, Alert, Modal, SearchBar, FlatList, VirtualizedList, SafeAreaView, StatusBar, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // const friends = [
@@ -40,7 +40,7 @@ const Item = ({ title }) => (
 class Settings extends Component {
   componentDidMount() {
     this.getChatInfo();
-    
+
     // this.refreshInterval = setInterval(this.getAllConversations, 1000); // refresh every 5 seconds
   }
   constructor(props) {
@@ -58,9 +58,9 @@ class Settings extends Component {
       addUserName: '',
       deleteUserName: '',
       data: "",
-      searchQuery:'',
-      chatMembers:'',
-      
+      searchQuery: '',
+      chatMembers: '',
+
     };
   }
 
@@ -90,11 +90,11 @@ class Settings extends Component {
     return this.state.data.length;
   };
 
-  getItem = (data,index) => {
+  getItem = (data, index) => {
     // console.log(this.state.data[index].title);
-    const { title, email,id } = this.state.data[index];
-    return { title, email,id };
-    
+    const { title, email, id } = this.state.data[index];
+    return { title, email, id };
+
     // return this.state.data[index];
   };
 
@@ -102,17 +102,17 @@ class Settings extends Component {
     return this.state.chatMembers.length;
   };
 
-  getChatMembersItem = (data,index) => {
+  getChatMembersItem = (data, index) => {
     // console.log(this.state.data[index].title);
-    const { title, email,id } = this.state.chatMembers[index];
-    return { title, email,id };
-    
+    const { title, email, id } = this.state.chatMembers[index];
+    return { title, email, id };
+
     // return this.state.data[index];
   };
-  
+
   getChatMembers = () => {
     // console.log(this.state.session_token)
-    fetch("http://localhost:3333/api/1.0.0/chat/"+this.state.chat_id, {
+    fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chat_id, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -139,14 +139,14 @@ class Settings extends Component {
 
         console.log(data); // Handle the JSON response
         // create an array of contacts available
-        const memberNames = data.members.map((member) =>( {
-          id:member.user_id,
-          title:`${member.first_name} ${member.last_name}`,
-          email:member.email
+        const memberNames = data.members.map((member) => ({
+          id: member.user_id,
+          title: `${member.first_name} ${member.last_name}`,
+          email: member.email
         }));
-        
-          console.log(memberNames);
-        
+
+        console.log(memberNames);
+
         this.setState({
           chatMembers: memberNames,
         });
@@ -192,19 +192,19 @@ class Settings extends Component {
       });
   };
 
-  
+
   addUserFromChatHandleOverlay = () => {
     this.setState({ overlayAddUserVisible: !this.state.overlayAddUserVisible });
-    
+
     this.getContacts();
-    this.setState({searchQuery:''});
+    this.setState({ searchQuery: '' });
   };
 
   handleDeleteAUserFromChatOverlay = () => {
     this.setState({ overlayDeleteUserVisible: !this.state.overlayDeleteUserVisible });
-    
+
     this.getChatMembers();
-    this.setState({searchQuery:''});
+    this.setState({ searchQuery: '' });
   };
 
 
@@ -282,7 +282,7 @@ class Settings extends Component {
     console.log(userId.toString());
     console.log(this.state.chat_id);
     console.log(this.state.session_token);
-    fetch('http://localhost:3333/api/1.0.0/chat/'+this.state.chat_id+'/user/'+userId.toString(), {
+    fetch('http://localhost:3333/api/1.0.0/chat/' + this.state.chat_id + '/user/' + userId.toString(), {
       method: 'DELETE',
       headers: {
         Accept: 'application/json',
@@ -290,26 +290,26 @@ class Settings extends Component {
         'X-Authorization': this.state.session_token,
       },
     })
-    .then(response => {
-     
-      if (response.status === 200) {
-        // Success
-  
-        return response; // Return the JSON response
-      } else {
-        // Error
-        
-        throw new Error('Something went wrong');
-      }
-    })
-    .then(data => {
-      console.log(data); // Handle the JSON response
-      
-    })
-    .catch(error => {
-      console.error(error.message); // Handle the error
-      // console.error(error.response); // Handle the error
-    });
+      .then(response => {
+
+        if (response.status === 200) {
+          // Success
+
+          return response; // Return the JSON response
+        } else {
+          // Error
+
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        console.log(data); // Handle the JSON response
+
+      })
+      .catch(error => {
+        console.error(error.message); // Handle the error
+        // console.error(error.response); // Handle the error
+      });
   };
 
   handleChatNameChange = () => {
@@ -353,7 +353,7 @@ class Settings extends Component {
   // getItemCount = (data) => data.length;
 
   // getItem = (data, index) => data[index];
-  
+
   //  Item = ({title}) => (
   //   <View style={styles.item}>
   //     <Text style={styles.title}>{title}</Text>
@@ -382,7 +382,7 @@ class Settings extends Component {
     console.log(userId.toString());
     console.log(this.state.chat_id);
     console.log(this.state.session_token);
-    fetch('http://localhost:3333/api/1.0.0/chat/'+this.state.chat_id+'/user/'+userId, {
+    fetch('http://localhost:3333/api/1.0.0/chat/' + this.state.chat_id + '/user/' + userId, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -390,34 +390,34 @@ class Settings extends Component {
         'X-Authorization': this.state.session_token,
       },
     })
-    .then(response => {
-     
-      if (response.status === 200) {
-        // Success
-  
-        return response; // Return the JSON response
-      } else {
-        // Error
-        
-        throw new Error('Something went wrong');
-      }
-    })
-    .then(data => {
-      console.log(data); // Handle the JSON response
-      
-    })
-    .catch(error => {
-      console.error(error.message); // Handle the error
-      // console.error(error.response); // Handle the error
-    });
+      .then(response => {
+
+        if (response.status === 200) {
+          // Success
+
+          return response; // Return the JSON response
+        } else {
+          // Error
+
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        console.log(data); // Handle the JSON response
+
+      })
+      .catch(error => {
+        console.error(error.message); // Handle the error
+        // console.error(error.response); // Handle the error
+      });
   };
 
-  handleAddUserToChat=(item)=>{
-    console.log(item+" "+" "+this.state.chat_id);
+  handleAddUserToChat = (item) => {
+    console.log(item + " " + " " + this.state.chat_id);
     this.AddUserToChat(item);
 
   }
-  handleDeleteUserFromChat=(item)=>{
+  handleDeleteUserFromChat = (item) => {
     // console.log(item+" "+" "+this.state.chat_id);
     // console.log(item);
     this.deleteUserFromChat(item);
@@ -451,94 +451,94 @@ class Settings extends Component {
           value={this.state.chat_name}
         />
         <Button onPress={this.handleChatNameChange} title="Change chat name" />
-        
-        <Modal animationType="fade" transparent={true} visible={this.state.overlayAddUserVisible}   >
-        <div style={styles.modelContainer}>
 
-              {/* <View style={{ height: 50, justifyContent: 'center', alignItems: 'center' }}>
+        <Modal animationType="fade" transparent={true} visible={this.state.overlayAddUserVisible}   >
+          <div style={styles.modelContainer}>
+
+            {/* <View style={{ height: 50, justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{ fontSize: 20 }}>Select a friend</Text>
               </View> */}
-    <SafeAreaView style={styles.container}>
-    <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-          onChangeText={(text) => this.searchFilterFunction(text)}
-          value={this.state.searchQuery}
-          placeholder="Search..."
-        />
-    {/* <SearchBar
+            <SafeAreaView style={styles.container}>
+              <TextInput
+                style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+                onChangeText={(text) => this.searchFilterFunction(text)}
+                value={this.state.searchQuery}
+                placeholder="Search..."
+              />
+              {/* <SearchBar
           placeholder="Search..."
           onChangeText={searchFilterFunction}
           value={this.state.searchQuery}
         /> */}
-    <VirtualizedList
-        data={this.state.data}
-        getItemCount={this.getItemCount}
-        getItem={this.getItem}
-        
-        renderItem = {({ item }) => {
-          console.log("hi im a ITEM: "+item);
-          return(
-          <TouchableOpacity onPress={() => this.handleAddUserToChat(item.id)}>
+              <VirtualizedList
+                data={this.state.data}
+                getItemCount={this.getItemCount}
+                getItem={this.getItem}
 
-            <View style={{ padding: 10 }}>
-            <Item title={item.title +"\n"+item.email}/>
-            </View>
-          </TouchableOpacity>
-          );
-        }}
-        keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
-      />
-    </SafeAreaView>
-    
-              <Button title="Close" onPress={this.addUserFromChatHandleOverlay} />
- 
-              </div>
+                renderItem={({ item }) => {
+                  console.log("hi im a ITEM: " + item);
+                  return (
+                    <TouchableOpacity onPress={() => this.handleAddUserToChat(item.id)}>
+
+                      <View style={{ padding: 10 }}>
+                        <Item title={item.title + "\n" + item.email} />
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }}
+                keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
+              />
+            </SafeAreaView>
+
+            <Button title="Close" onPress={this.addUserFromChatHandleOverlay} />
+
+          </div>
         </Modal>
 
         {/* DELETE A USER OVERLAY */}
         <Modal animationType="fade" transparent={true} visible={this.state.overlayDeleteUserVisible}   >
-        <div style={styles.modelContainer}>
+          <div style={styles.modelContainer}>
 
-              {/* <View style={{ height: 50, justifyContent: 'center', alignItems: 'center' }}>
+            {/* <View style={{ height: 50, justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{ fontSize: 20 }}>Select a friend</Text>
               </View> */}
-    <SafeAreaView style={styles.container}>
-    <TextInput
-          style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-          onChangeText={(text) => this.searchFilterFunction(text)}
-          value={this.state.searchQuery}
-          placeholder="Search..."
-        />
-    {/* <SearchBar
+            <SafeAreaView style={styles.container}>
+              <TextInput
+                style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+                onChangeText={(text) => this.searchFilterFunction(text)}
+                value={this.state.searchQuery}
+                placeholder="Search..."
+              />
+              {/* <SearchBar
           placeholder="Search..."
           onChangeText={searchFilterFunction}
           value={this.state.searchQuery}
         /> */}
-    <VirtualizedList
-        data={this.state.chatMembers}
-        getItemCount={this.getChatMembersItemCount}
-        getItem={this.getChatMembersItem}
-        
-        renderItem = {({ item }) => {
-          console.log("ITEM HERE: "+item);
-          return(
-          <TouchableOpacity onPress={() => this.handleDeleteUserFromChat(item.id)}>
+              <VirtualizedList
+                data={this.state.chatMembers}
+                getItemCount={this.getChatMembersItemCount}
+                getItem={this.getChatMembersItem}
 
-            <View style={{ padding: 10 }}>
-            <Item title={item.title +"\n"+item.email}/>
-            </View>
-          </TouchableOpacity>
-          );
-        }}
-        keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
-      />
-    </SafeAreaView>
-    
-              <Button title="Close" onPress={this.handleDeleteAUserFromChatOverlay} />
- 
-              </div>
+                renderItem={({ item }) => {
+                  console.log("ITEM HERE: " + item);
+                  return (
+                    <TouchableOpacity onPress={() => this.handleDeleteUserFromChat(item.id)}>
+
+                      <View style={{ padding: 10 }}>
+                        <Item title={item.title + "\n" + item.email} />
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }}
+                keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
+              />
+            </SafeAreaView>
+
+            <Button title="Close" onPress={this.handleDeleteAUserFromChatOverlay} />
+
+          </div>
         </Modal>
-        
+
       </View>
 
 
@@ -551,10 +551,10 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: StatusBar.currentHeight,
     // width:'50%',
-    height:'80%',
-    justifyContent:'center',
-    alignContent:'center',
-    
+    height: '80%',
+    justifyContent: 'center',
+    alignContent: 'center',
+
   },
   modelContainer: {
     position: 'absolute',
