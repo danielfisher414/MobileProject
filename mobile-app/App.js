@@ -44,11 +44,11 @@ const App = () => {
   return (
     // <EditProfile/>
     // <Settings/>
-    <Contacts/>
-    // <NavigationContainer>
-    //   {conversationId != null ? <Conversation Conversation screenName={conversationId}/> :
-    //   id == null ? <Navigation/>:<HomeTab/>}
-    //   </NavigationContainer>
+    // <Contacts/>
+    <NavigationContainer>
+      {conversationId != null ? <Conversation Conversation screenName={conversationId}/> :
+      id == null ? <Navigation/>:<HomeTab/>}
+      </NavigationContainer>
 
   );
 };

@@ -459,6 +459,7 @@ class Contact extends Component {
         <Modal animationType="fade" transparent={false} visible={this.state.searchBlockedUsers}>
           {/* ALL CONTACTS DIV BOX */}
           <Button title='Close' onPress={this.handleSearchForBlockedUsers} />
+          <div>
           <SafeAreaView style={styles.container}>
 
             <VirtualizedList
@@ -484,6 +485,7 @@ class Contact extends Component {
             />
 
           </SafeAreaView>
+          </div>
         </Modal>
         {/* END of model overlay for viewing blocked users */}
 
@@ -536,7 +538,8 @@ class Contact extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
+    textAlign:'center',
     // width:'50%',
     height: '100%',
     justifyContent: 'center',
@@ -547,14 +550,15 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     position: 'relative',
+    // paddingBottom:30,
     top: 0,
     bottom: 0,
     left: 0,
     right: 0,
     justifyContent: 'space-evenly',
     alignItems: 'center',
-    width: '100%',
-    height: 500,
+    // width: '100%',
+    height: 370,
     backgroundColor: 'white',
     borderRadius: 10,
     shadowColor: '#000',
