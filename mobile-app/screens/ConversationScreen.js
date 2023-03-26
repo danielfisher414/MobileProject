@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View,Modal,TouchableWithoutFeedback } from 'react-native';
-import { GiftedChat, Bubble, Avatar } from 'react-native-gifted-chat';
+import PropTypes from 'prop-types';
+import { Text, Clipboard,TextInput,Button, View,Modal,TouchableWithoutFeedback,TouchableOpacity,ViewPropTypes,StyleSheet,ActionSheetIOS, Platfor } from 'react-native';
+import { GiftedChat, Bubble, Avatar  } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 
 class ConversationScreen extends Component {
   componentDidMount() {
     // this.getChatInfo();
     this.refreshInterval = setInterval(this.getChatInfo(), 100);
-    // this.refreshInterval = setInterval(this.getAllConversations, 1000); // refresh every 5 seconds
+    this.refreshInterval = setInterval(this.getAllConversations, 1000); // refresh every 5 seconds
   }
 
   componentWillUnmount() {
@@ -24,7 +24,11 @@ class ConversationScreen extends Component {
       chat_name: '',
       author_ids: null,
       showAvatar: '',
-      visible:false
+      visible:false,
+      EditMessageOverlayVisible:false,
+      currentMessage:'',
+      // currentMessage:'',
+      currentMessageID:'',
     };
   }
 
@@ -38,8 +42,6 @@ class ConversationScreen extends Component {
       .then(([chat_id, chat_name, session_token, user_id]) => {
         if (chat_id && chat_name) {
           this.setState({ chat_id, chat_name, session_token, user_id });
-          // console.log(this.state.chat_id,this.state.chat_name);
-          // console.log(this.state.session_token);
           this.getAllConversations();
         } else {
           // handle missing values
@@ -69,7 +71,7 @@ class ConversationScreen extends Component {
         }
       })
       .then((data) => {
-        console.log(data);
+        // console.log(data);
         const messages = data.messages.map(message => ({
 
           _id: message.message_id,
@@ -98,8 +100,6 @@ class ConversationScreen extends Component {
 
   onSend = (newMessages) => {
 
-    // console.log(JSON.stringify(newMessages));
-    // console.log(newMessages[0].text);
     const messageSent = newMessages[0].text;
     // console.log("chatmsg "+newMessages[0]);
     this.setState(previousState => ({
@@ -128,23 +128,10 @@ class ConversationScreen extends Component {
     });
   };
   
-  // renderBubble = props => {
-  //   return (
-  //     <Bubble
-  //       {...props}
-  //       wrapperStyle={{
-  //         left: {
-  //           backgroundColor: "#f0f0f0"
-  //         }
-  //       }}
-  //     />
-  //   );
-  // };
-  
   renderAvatar=(props)=> {
     const { currentMessage } = props;
     const authorId = currentMessage.user._id;
-    console.log("im here hello "+authorId);
+
     if(authorId==this.state.user_id){
       return null;
       
@@ -163,30 +150,17 @@ class ConversationScreen extends Component {
     const { currentMessage } = props;
     const authorId = currentMessage.user._id;
 
-    console.log(authorId);
-    console.log("current user id: " + this.state.user_id);
+
     if (authorId == this.state.user_id) {
 
       return (
-        <TouchableWithoutFeedback onPress={() => this.handleBubblePress()}>
           
         <Bubble
           {...props}
-          // wrapperStyle={{
-          //   left: {
-          //     backgroundColor: '#cccccc',
-          //   },
-          // }}
-          // textStyle={{
-          //   left: {
-          //     color: 'black',
-          //   },
-          // }}
           position={'right'} //moves the position of the bubble
           // renderAvatar={() => null}
-          style={{ marginRight: 60, marginBottom: 10 }} // add marginRight style
+          style={{ marginRight: 60, marginBottom: 20 }} // add marginRight style
         />
-        </TouchableWithoutFeedback>
       );
     } else {
 
@@ -195,16 +169,6 @@ class ConversationScreen extends Component {
         <Bubble
           {...props}
           
-          // wrapperStyle={{
-          //   left: {
-          //     backgroundColor: '#cccccc',
-          //   },
-          // }}
-          // textStyle={{
-          //   left: {
-          //     color: 'black',
-          //   },
-          // }}
           position={'left'} //moves the position of the bubble
           style={{ marginRight: 60, marginBottom: 10 }} // add marginRight style
         />
@@ -212,44 +176,149 @@ class ConversationScreen extends Component {
       );
     }
   }
+  handleDeleteMessage = () => {
+    
+    fetch('http://localhost:3333/api/1.0.0/chat/'+this.state.chat_id+'/message/'+this.state.currentMessageID, {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token
+      },
+    })
+      .then(response => {
+        if (response.status === 200) {
+          // Success
+          console.log('success')
+          return response; // Return the JSON response
+        } else {
+          // Error
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        console.log(data); // Handle the JSON response
 
-  // handleOverlay =() =>{
+      })
+      .catch(error => {
+        console.error(error.message); // Handle the error
+        // console.error(error.response); // Handle the error
+      });
+  };
+
+  handleEditedMessage = () => {
+    fetch('http://localhost:3333/api/1.0.0/chat/'+this.state.chat_id+'/message/'+this.state.currentMessageID, {
+      method: 'PATCH',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Authorization': this.state.session_token,
+      },
+      body: JSON.stringify({
+        message: this.state.currentMessage,
+      }),
+    })
+    .then(response => {
+      if (response.status === 200) {
+        // Success
+        console.log('success')
+        return response; // Return the JSON response
+      } else {
+        // Error
+        throw new Error('Something went wrong');
+      }
+    })
+    .then(data => {
+      console.log(data); // Handle the JSON response
+
+    })
+    .catch(error => {
+      console.error(error.message); // Handle the error
+      // console.error(error.response); // Handle the error
+    });
+  };
+
+  handleEditMessageOverlay =() =>{
   
-  //   this.setState({ visible: !this.state.visible });
+    this.setState({ EditMessageOverlayVisible: !this.state.EditMessageOverlayVisible });
      
-  // };
+  };
+
+  handleSubmitEditMessage=() =>{
+  
+    this.setState({ EditMessageOverlayVisible: !this.state.EditMessageOverlayVisible });
+    // this.setState({ currentMessage: !this.state.currentMessage });
+     this.handleEditedMessage();
+  };
   
   handleBubblePress() {
     this.setState({ visible: true });
   }
 
 
+  onLongPress=(context, currentMessage)=> {
+    this.setState({currentMessageID:currentMessage._id})
+    console.log(currentMessage);
+    console.log(this.state.chat_id);
+    // const message = currentMessage;
+    const options = ['Copy Text','Delete Message','Edit Message', 'Cancel'];
+    const cancelButtonIndex = options.length - 1;
+    console.log("cancelButtonIndex: "+cancelButtonIndex)
+    context.actionSheet().showActionSheetWithOptions({
+        options,
+        cancelButtonIndex
+    }, (buttonIndex) => {
+        switch (buttonIndex) {
+            case 0:
+              console.log("buttonIndex: "+buttonIndex);
+              Clipboard.setString(currentMessage.text);
+                break;
+            case 1:
+                this.handleDeleteMessage();
+                break;
+            case 2:
+              this.handleEditMessageOverlay();
+              this.setState({currentMessage:currentMessage.text});
+              break;
+            case 3:
+                break;
+        }
+    });
+}
+
+handleEditMessageChange=(newtext)=>{
+  this.setState({currentMessage:newtext})
+};
+
   render() {
-    // console.log("here-> :"+this.state.author_id);
 
-
-    console.log("hi2");
+    // console.log("hi2");
     return (
 
       <View style={{ backgroundColor: "white", flex: 1 }}>
-        {/* {alert(this.state.chat_id)} */}
-
-        {/* <TouchableWithoutFeedback onPress={this.handleOverlay}> */}
         <GiftedChat
 
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           renderBubble={this.renderBubble} // bubble render
-          
+          onLongPress={this.onLongPress}
           renderAvatar={this.renderAvatar}
-          // showUserAvatar={true}
-          // renderMessage={this.renderMessage}
-
         />
-        <Modal animationType="fade" transparent={true} visible={this.state.visible}>
-        <Text>This is an overlay</Text>
+        {/* OVERLAY */}
+        <Modal animationType="fade" transparent={true} visible={this.state.EditMessageOverlayVisible}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+            <View style={{ backgroundColor: 'white', padding: 60 }}>
+              <Text>Edit message!</Text>
+              <div id='editMessageBox'>
+              <TextInput onChangeText={this.handleEditMessageChange} value={this.state.currentMessage}></TextInput>
+           
+              </div>
+              <Button title="Submit" onPress={this.handleSubmitEditMessage} />
+              <Button title="Close" onPress={this.handleEditMessageOverlay} />
+            </View>
+          </View>
         </Modal>
-        {/* </TouchableWithoutFeedback> */}
+        {/* END OF OVERLAY */}
       </View>
     );
 
