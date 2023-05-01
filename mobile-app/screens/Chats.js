@@ -1,24 +1,23 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View, Button, Alert,Modal, TouchableOpacity,SafeAreaView,VirtualizedList,StyleSheet} from 'react-native';
+import { Text, FlatList, TextInput, View, Button, Alert, Modal, TouchableOpacity, SafeAreaView, VirtualizedList, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
-const Item = ({ title }) => (
-  <View style={styles.chatContaier}>
-    <Text style={styles.chatTitle}>{title}</Text>
-  </View>
-);
-
-class Chats extends Component{
-  componentDidMount(){
-    this.getUserInfo();
+class Chats extends Component {
+  componentDidMount() {
+    // this.getAllConversations();
+    // this.getUserInfo();
+    this.refreshInterval = setInterval(() => {
+      this.getAllConversations();
+      this.getUserInfo();
+    }, 1000);
   }
-  constructor(props){
+  constructor(props) {
     super(props);
-    this.state={user_id:'',session_token:'',visible:false,chatName:'',chats:[],chatsID:[]};
+    this.state = { user_id: '', session_token: '', showBadRequestMsg: false, visible: false, chatName: '', chats: [], chatsID: [] };
     this.getUserInfo = this.getUserInfo.bind(this);
   }
-  
+
   getUserInfo = () => {
     Promise.all([
       AsyncStorage.getItem('user_id'),
@@ -30,12 +29,12 @@ class Chats extends Component{
           this.getAllConversations();
         } else {
           // handle missing values
-          console.log(error);
+          // console.log(error);
         }
       })
-      .catch((error) => console.log(error));
+    // .catch((error) => console.log(error));
   };
-  
+
 
   getAllConversations = () => {
     fetch('http://localhost:3333/api/1.0.0/chat', {
@@ -48,32 +47,31 @@ class Chats extends Component{
     })
       .then(response => {
         if (response.status === 200) {
-          // Success
-          return response.json(); // Return the JSON response
+          return response.json();
         } else {
-          // Error
           throw new Error('Something went wrong');
         }
       })
-      .then((data) => {
-        console.log("data: "+data)
-        const newChat  = data.map((item) =>( {
-          title:item.name,
-          id: item.chat_id,
-          last_message: item.last_message.message,
-          // email:member.email
+      .then(data => {
+        console.log(data)
+        const newChats = data.filter(chat => !this.state.chatsID.includes(chat.chat_id))
+          .map(chat => ({
+            title: chat.name,
+            id: chat.chat_id,
+            last_message: chat.last_message.message,
+            creator_id: chat.creator.user_id,
+            creator_name: chat.creator.email
+          }));
+        this.setState(prevState => ({
+          chats: [...prevState.chats, ...newChats],
+          chatsID: [...prevState.chatsID, ...newChats.map(chat => chat.id)]
         }));
-        this.setState(prevState=>({
-          chats: [...prevState.chats, ...newChat],
-        }))
-        console.log(this.state.chats); // Use this.state.chats instead of prevState.chats
       })
       .catch(error => {
-        console.error(error.message); // Handle the error
-        // console.error(error.response); // Handle the error
+        console.error(error.message);
       });
   };
-  
+
 
   handleShowAllChats = (element, elementId) => {
     // Create a new object that includes both the chat and its ID
@@ -81,7 +79,7 @@ class Chats extends Component{
       chat: element,
       chatId: elementId,
     };
-  
+
     // Update the state with the new chat and chat ID
     this.setState(prevState => ({
       chats: [...prevState.chats, newChat],
@@ -90,7 +88,15 @@ class Chats extends Component{
     console.log(chats)
   };
 
-  handleCreateChat = () =>{
+  handleCreateChat = () => {
+
+    if (this.state.chatName.length == 0) {
+      this.setState({ showBadRequestMsg: true });
+      return;
+    } else {
+      this.setState({ showBadRequestMsg: false });
+    }
+
     const requestBody = {
       name: this.state.chatName
     };
@@ -107,7 +113,7 @@ class Chats extends Component{
       .then(response => {
         if (response.status === 201) {
           // Success
-    
+
           return response.json(); // Return the JSON response
         } else {
           // Error
@@ -116,7 +122,7 @@ class Chats extends Component{
       })
       .then(data => {
         console.log(data); // Handle the JSON response
-        
+
       })
       .catch(error => {
         console.error(error.message); // Handle the error
@@ -124,23 +130,25 @@ class Chats extends Component{
       });
   };
 
-  handleOverlay =() =>{
-  
+
+  handleOverlay = () => {
+
     this.setState({ visible: !this.state.visible });
-     
+
   };
   handleChatNameTextChange = (newtext) => {
     this.setState({ chatName: newtext })
   };
-  handleClickedOnChatName = (chat,index)=>{
-    console.log('Clicked:', index,chat) //THIS IS WRONG URGENT FIX!!!!!!!1
-    this.handleChatScreen(index,chat);
+  handleClickedOnChatName = (chat, index, creator_id) => {
+    console.log('Clicked: ' + creator_id)
+    this.handleChatScreen(index, chat, creator_id);
   };
 
-  handleChatScreen = (chat_id,chat_name) => {
+  handleChatScreen = (chat_id, chat_name, creator_id) => {
     try {
       AsyncStorage.setItem('chat_id', chat_id)
       AsyncStorage.setItem('chat_name', chat_name)
+      AsyncStorage.setItem('chat_creator_id', creator_id)
         .then(() => {
           console.log('Value stored successfully!');
           // reloading the page
@@ -154,102 +162,107 @@ class Chats extends Component{
     }
   };
 
-  getChatItemCount = () => {
-    return this.state.chats.length;
-  };
 
-  getChatItem = (data,index) => {
-    // console.log(this.state.data[index].title);
-    const { title,id,last_message } = this.state.chats[index];
-    return { title, id,last_message };
-    
-    // return this.state.data[index];
-  };
+  render() {
+    return (
+      <View style={{ backgroundColor: 'white', height: '100%' }}>
+        <Button title='Create Chat' onPress={this.handleOverlay} />
 
-  render(){
-    return(
-        <View>
-         
-          <Button title='Create Chat' onPress={this.handleOverlay}/>
+        <View style={{ backgroundColor: 'white', flex: 1 }}>
+          <FlatList
+            data={this.state.chats}
+            renderItem={({ item }) => (
+              // <TouchableOpacity onPress={() => this.handleClickedOnChatName(item.title, item.id,item.creator_id)}>
+              //   <View style={{ padding: 10, textAlign: 'center' }}>
+              //     <Item title={item.title} />
+              //   </View>
+              // </TouchableOpacity>
+              <TouchableOpacity onPress={() => this.handleClickedOnChatName(item.title, item.id, item.creator_id)}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 15 }}>
+                  <View style={{ flex: 1, textAlign: 'center' }}>
+                    <View style={{
+                      padding: 10, 
+                      borderRadius: 10,
+                      borderRadius: 5,
+                      boxShadow: '0px 0px 5px 0px rgba(0,0,0,0.5)',
+                      // overflow: 'hidden',
+                    }}>
+                      <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.title}</Text>
+                      {item.last_message != null ? (<View><Text style={{ fontSize: 14, color: '#888' }}>Last message: {item.last_message}</Text></View>) : null}
 
-          {/* all chats visable */}
-          {/* <div id="allChatsBox" style={{ height:'100%',touchAction: 'none'}}>
 
-          {this.state.chats.map((chat, index) => (
-            <TouchableOpacity onPress={() => this.handleClickedOnChatName(chat,index)}>
-            
-               <Text style={{ color: 'black', fontSize:'20px',textAlign:'center'}}>{chat.chat}</Text>
-            </TouchableOpacity>
-          ))}
-        </div> */}
+                      <Text style={{ fontSize: 14, color: '#888' }}>Created by: {item.creator_name}</Text>
+                    </View>
+                  </View>
 
-<div >
-<SafeAreaView style={styles.container}>
-    <VirtualizedList 
-        data={this.state.chats}
-        getItemCount={this.getChatItemCount}
-        getItem={this.getChatItem}
-        
-        renderItem = {({ item }) => {
-          console.log("ITEM HERE: "+item.title);
-          // console.log("ITEM HERE: "+item.id);
-          // console.log("ITEM HERE: "+item.last_message);
-          return(
-          <TouchableOpacity onPress={() => this.handleClickedOnChatName(item.title,item.id)}>
+                </View>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item.id.toString()}
+          />
+        </View>
+        {/* end all chats visable */}
 
-            <View style={{ padding: 10 }}>
-            <Item title={item.title}/>
-            </View>
-          </TouchableOpacity>
-          );
-        }}
-        keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
-      />
-    </SafeAreaView>
-    </div>
-          {/* end all chats visable */}
+        {/* OVERLAY */}
 
-              {/* OVERLAY */}
+        <Modal animationType="fade" transparent={true} visible={this.state.visible}>
+          <View style={styles.overlay}>
+            <View style={styles.content}>
+              <View style={{ marginBottom: 20 }}>
+                <Text style={styles.title}>Name the chat!</Text>
+              </View>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder='Chat name'
+                  onChangeText={this.handleChatNameTextChange}
+                  value={this.state.chatName}
+                />
+                <View>
+                  {this.state.showBadRequestMsg ? (
+                    <Text style={styles.labelError}>Please Type In A Chat Name</Text>
+                  ) : null}
+                </View>
+              </View>
 
-          <Modal animationType="fade" transparent={true} visible={this.state.visible}>
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-            <View style={{ backgroundColor: 'white', padding: 60 }}>
-              <Text>Name the chat!</Text>
-              <div id='createChatInput'>
-              <TextInput placeholder='chat name' onChangeText={this.handleChatNameTextChange}></TextInput>
-              <Button title="Submit" onPress={this.handleCreateChat}/>
-              </div>
-              {/* END OF OVERLAY */}
-
-              <Button title="Close" onPress={this.handleOverlay} />
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity onPress={this.handleCreateChat}>
+                  <Text style={styles.buttonText}>Submit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={this.handleOverlay}>
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>
-
-        </View>
+        {/* End of OVERLAY */}
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  chatContaier:{
+  chatContaier: {
     flex: 1,
-      backgroundColor: 'white',
-  padding: 10,
-  borderRadius: 5,
-  boxShadow: '0px 0px 5px 0px rgba(0,0,0,0.2)'
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 5,
+    boxShadow: '0px 0px 5px 0px rgba(0,0,0,0.2)',
+    overflow: 'hidden'
   },
   container: {
-    textAlign:'center',
+    textAlign: 'center',
+    backgroundColor: 'white',
     // flex: 1,
     // marginTop: StatusBar.currentHeight,
     // width:'50%',
-    height:'25%',
-    justifyContent:'center',
-    alignContent:'center',
-    
+    height: '100%',
+    justifyContent: 'center',
+    alignContent: 'center',
+
   },
-    chatTitle: {
+  chatTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginVertical: 10,
@@ -285,9 +298,56 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 32,
-    
+    fontSize: 24,
+    fontWeight: 'bold',
+
   },
+  overlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    alignContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  content: {
+    backgroundColor: 'white',
+    padding: 40,
+    borderRadius: 10,
+  },
+  inputContainer: {
+    marginBottom: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    width: '100%',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    justifyContent: 'space-evenly'
+  },
+  buttonText: {
+    color: 'black',
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+  },
+  labelError: {
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#f02b1d'
+  },
+  // title: {
+  //   fontSize: 20,
+  //   fontWeight: 'bold',
+  //   marginBottom: 10,
+  // },
 });
 
 export default Chats;

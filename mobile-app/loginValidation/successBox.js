@@ -1,9 +1,18 @@
 import React from 'react';
+import { Text, StyleSheet, TouchableOpacity, TextInput, View, Button, Alert } from 'react-native';
 
 export const SuccessBox = ()=>{
     return(
-    <div>
-        <h3>Success</h3>
-    </div>
-    )
-}
+
+            <View>
+        <Text style={styles.label}>Success</Text>
+      </View>
+    );
+};
+
+const styles = StyleSheet.create({
+  label: {
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+});

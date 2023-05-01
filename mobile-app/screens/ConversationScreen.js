@@ -1,14 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Text, Clipboard,TextInput,Button, View,Modal,TouchableWithoutFeedback,TouchableOpacity,ViewPropTypes,StyleSheet,ActionSheetIOS, Platfor } from 'react-native';
-import { GiftedChat, Bubble, Avatar  } from 'react-native-gifted-chat';
+import { Text, Clipboard, TextInput, Button, View, Modal, TouchableWithoutFeedback, TouchableOpacity, ViewPropTypes, StyleSheet, ActionSheetIOS, Platfor } from 'react-native';
+import { GiftedChat, Bubble, Avatar } from 'react-native-gifted-chat';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class ConversationScreen extends Component {
   componentDidMount() {
     // this.getChatInfo();
-    this.refreshInterval = setInterval(this.getChatInfo(), 100);
-    this.refreshInterval = setInterval(this.getAllConversations, 1000); // refresh every 5 seconds
+
+    this.refreshInterval = setInterval(() => {
+      this.getAllConversations();
+      this.getChatInfo();
+    }, 1000);
   }
 
   componentWillUnmount() {
@@ -24,11 +27,10 @@ class ConversationScreen extends Component {
       chat_name: '',
       author_ids: null,
       showAvatar: '',
-      visible:false,
-      EditMessageOverlayVisible:false,
-      currentMessage:'',
-      // currentMessage:'',
-      currentMessageID:'',
+      visible: false,
+      EditMessageOverlayVisible: false,
+      currentMessage: '',
+      currentMessageID: '',
     };
   }
 
@@ -109,9 +111,9 @@ class ConversationScreen extends Component {
       const lastMessage = newMessages[0];
       const { text, user, createdAt } = lastMessage;
       const data = { text, user, createdAt };
-      
-      
-      fetch('http://localhost:3333/api/1.0.0/chat/'+this.state.chat_id+'/message', {
+
+
+      fetch('http://localhost:3333/api/1.0.0/chat/' + this.state.chat_id + '/message', {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -121,25 +123,25 @@ class ConversationScreen extends Component {
         body: JSON.stringify({
           message: messageSent,
         })
-        
+
       });
       this.getAllConversations();
 
     });
   };
-  
-  renderAvatar=(props)=> {
+
+  renderAvatar = (props) => {
     const { currentMessage } = props;
     const authorId = currentMessage.user._id;
 
-    if(authorId==this.state.user_id){
+    if (authorId == this.state.user_id) {
       return null;
-      
-    }else{
+
+    } else {
       return (
         <Avatar
           {...props}
-          position= "left"
+          position="left"
           style={{ marginLeft: 8, marginRight: 8 }}
         />
       );
@@ -154,7 +156,7 @@ class ConversationScreen extends Component {
     if (authorId == this.state.user_id) {
 
       return (
-          
+
         <Bubble
           {...props}
           position={'right'} //moves the position of the bubble
@@ -168,7 +170,7 @@ class ConversationScreen extends Component {
 
         <Bubble
           {...props}
-          
+
           position={'left'} //moves the position of the bubble
           style={{ marginRight: 60, marginBottom: 10 }} // add marginRight style
         />
@@ -177,8 +179,8 @@ class ConversationScreen extends Component {
     }
   }
   handleDeleteMessage = () => {
-    
-    fetch('http://localhost:3333/api/1.0.0/chat/'+this.state.chat_id+'/message/'+this.state.currentMessageID, {
+
+    fetch('http://localhost:3333/api/1.0.0/chat/' + this.state.chat_id + '/message/' + this.state.currentMessageID, {
       method: 'DELETE',
       headers: {
         Accept: 'application/json',
@@ -207,7 +209,7 @@ class ConversationScreen extends Component {
   };
 
   handleEditedMessage = () => {
-    fetch('http://localhost:3333/api/1.0.0/chat/'+this.state.chat_id+'/message/'+this.state.currentMessageID, {
+    fetch('http://localhost:3333/api/1.0.0/chat/' + this.state.chat_id + '/message/' + this.state.currentMessageID, {
       method: 'PATCH',
       headers: {
         Accept: 'application/json',
@@ -218,83 +220,100 @@ class ConversationScreen extends Component {
         message: this.state.currentMessage,
       }),
     })
-    .then(response => {
-      if (response.status === 200) {
-        // Success
-        console.log('success')
-        return response; // Return the JSON response
-      } else {
-        // Error
-        throw new Error('Something went wrong');
-      }
-    })
-    .then(data => {
-      console.log(data); // Handle the JSON response
+      .then(response => {
+        if (response.status === 200) {
+          // Success
+          console.log('success')
+          return response; // Return the JSON response
+        } else {
+          // Error
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        console.log(data); // Handle the JSON response
 
-    })
-    .catch(error => {
-      console.error(error.message); // Handle the error
-      // console.error(error.response); // Handle the error
-    });
+      })
+      .catch(error => {
+        console.error(error.message); // Handle the error
+        // console.error(error.response); // Handle the error
+      });
   };
 
-  handleEditMessageOverlay =() =>{
-  
+  handleEditMessageOverlay = () => {
+
     this.setState({ EditMessageOverlayVisible: !this.state.EditMessageOverlayVisible });
-     
+
   };
 
-  handleSubmitEditMessage=() =>{
-  
+  handleSubmitEditMessage = () => {
+
     this.setState({ EditMessageOverlayVisible: !this.state.EditMessageOverlayVisible });
     // this.setState({ currentMessage: !this.state.currentMessage });
-     this.handleEditedMessage();
+    this.handleEditedMessage();
   };
-  
+
   handleBubblePress() {
     this.setState({ visible: true });
   }
 
 
-  onLongPress=(context, currentMessage)=> {
-    this.setState({currentMessageID:currentMessage._id})
-    console.log(currentMessage);
-    console.log(this.state.chat_id);
-    // const message = currentMessage;
-    const options = ['Copy Text','Delete Message','Edit Message', 'Cancel'];
-    const cancelButtonIndex = options.length - 1;
-    console.log("cancelButtonIndex: "+cancelButtonIndex)
-    context.actionSheet().showActionSheetWithOptions({
-        options,
-        cancelButtonIndex
-    }, (buttonIndex) => {
-        switch (buttonIndex) {
-            case 0:
-              console.log("buttonIndex: "+buttonIndex);
-              Clipboard.setString(currentMessage.text);
-                break;
-            case 1:
-                this.handleDeleteMessage();
-                break;
-            case 2:
-              this.handleEditMessageOverlay();
-              this.setState({currentMessage:currentMessage.text});
-              break;
-            case 3:
-                break;
-        }
-    });
-}
+  onLongPress = (context, currentMessage) => {
+    this.setState({ currentMessageID: currentMessage._id })
+    let messageUserId = currentMessage.user._id;
 
-handleEditMessageChange=(newtext)=>{
-  this.setState({currentMessage:newtext})
-};
+    const options = ['Copy Text', 'Delete Message', 'Edit Message', 'Cancel'];
+    const userOnlyOptions = ['Copy Text', 'Cancel'];
+    const cancelButtonIndex = options.length - 1;
+    const userOnlyCancelButtonIndex = userOnlyOptions.length - 1;
+
+    if (messageUserId == this.state.user_id) {
+      context.actionSheet().showActionSheetWithOptions({
+        options: options,  
+        cancelButtonIndex: cancelButtonIndex
+      }, (buttonIndex) => {
+        switch (buttonIndex) {
+          case 0:
+            console.log("buttonIndex: " + buttonIndex);
+            Clipboard.setString(currentMessage.text);
+            break;
+          case 1:
+            this.handleDeleteMessage();
+            break;
+          case 2:
+            this.handleEditMessageOverlay();
+            this.setState({ currentMessage: currentMessage.text });
+            break;
+          case 3:
+            break;
+        }
+      });
+    } else {
+      context.actionSheet().showActionSheetWithOptions({
+        options: userOnlyOptions, 
+        cancelButtonIndex: userOnlyCancelButtonIndex
+      }, (buttonIndex) => {
+        switch (buttonIndex) {
+          case 0:
+            console.log("buttonIndex: " + buttonIndex);
+            Clipboard.setString(currentMessage.text);
+            break;
+          case 1:
+            break;
+        }
+      });
+    }
+  }
+
+  handleEditMessageChange = (newtext) => {
+    this.setState({ currentMessage: newtext })
+  };
 
   render() {
 
     // console.log("hi2");
     return (
-
+      
       <View style={{ backgroundColor: "white", flex: 1 }}>
         <GiftedChat
 
@@ -307,14 +326,20 @@ handleEditMessageChange=(newtext)=>{
         {/* OVERLAY */}
         <Modal animationType="fade" transparent={true} visible={this.state.EditMessageOverlayVisible}>
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-            <View style={{ backgroundColor: 'white', padding: 60 }}>
-              <Text>Edit message!</Text>
-              <div id='editMessageBox'>
-              <TextInput onChangeText={this.handleEditMessageChange} value={this.state.currentMessage}></TextInput>
-           
-              </div>
-              <Button title="Submit" onPress={this.handleSubmitEditMessage} />
-              <Button title="Close" onPress={this.handleEditMessageOverlay} />
+            <View style={{ backgroundColor: 'white', padding: 40, borderRadius: 10 }}>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>Edit Your Message</Text>
+              <View style={{ marginBottom: 10 }}>
+                <TextInput onChangeText={this.handleEditMessageChange} value={this.state.currentMessage} multiline={true} numberOfLines={4} style={{ borderWidth: 1, borderColor: 'gray', borderRadius: 5, padding: 5 }}></TextInput>
+              </View>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <TouchableOpacity onPress={this.handleSubmitEditMessage} style={{ backgroundColor: 'green', borderRadius: 5, padding: 10 }}>
+                  <Text style={{ color: 'white', fontWeight: 'bold' }}>Submit</Text>
+
+                </TouchableOpacity>
+                <TouchableOpacity onPress={this.handleEditMessageOverlay} style={{ backgroundColor: 'red', borderRadius: 5, padding: 10 }}>
+                  <Text style={{ color: 'white', fontWeight: 'bold' }}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>

@@ -7,6 +7,7 @@ const ExitScreen = () => {
     try {
       AsyncStorage.removeItem('chat_id');
       AsyncStorage.removeItem('chat_name');
+      AsyncStorage.removeItem('chat_creator_id');
       console.log('Item removed successfully');
       window.location.reload(false);
     } catch (error) {
@@ -19,11 +20,6 @@ const ExitScreen = () => {
     return(
       
         <View>
-          {/* <Text>Exit Screen!</Text>
-              <Button 
-                title="Go to About Me"
-                onPress={this.handleExit}
-      /> */}
         </View>
     );
     

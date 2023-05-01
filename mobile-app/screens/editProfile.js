@@ -3,10 +3,14 @@ import { Text, TextInput, View, Button, Alert, Modal, StyleSheet, Image, Touchab
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Input } from 'react-chat-elements';
 import passwordValidator from 'password-validator';
+
+import emailValidator from 'email-validator';
+
+
 class EditProfile extends Component {
     componentDidMount() {
         this.getUserInfo();
-        
+
     }
 
     constructor(props) {
@@ -23,6 +27,10 @@ class EditProfile extends Component {
             newPassword: '',
             newPassword2: '',
             userProfilePic: 'https://www.ateneo.edu/sites/default/files/styles/large/public/2021-11/istockphoto-517998264-612x612.jpeg?itok=aMC1MRHJ',
+            isValidEmail: true,
+            isValidFirstName: true,
+            isValidLastName: true,
+            passwordChanged: null,
         };
         this.getUserInfo = this.getUserInfo.bind(this);
     }
@@ -58,7 +66,38 @@ class EditProfile extends Component {
             });
     };
 
+    validationEmail = (email) => {
+        return emailValidator.validate(email);
+    }
+
+
     handleUpdateProfile = () => {
+
+        let emailCheck = this.validationEmail(this.state.email);
+
+        if (this.state.first_name.length == 0) {
+            this.setState({ isValidFirstName: false })
+            return;
+        } else {
+            this.setState({ isValidFirstName: true })
+        }
+
+        if (this.state.last_name.length == 0) {
+            this.setState({ isValidLastName: false })
+            return;
+        } else {
+            this.setState({ isValidLastName: true })
+        }
+
+        if (emailCheck == false) {
+            this.setState({ isValidEmail: false })
+            return;
+        } else {
+            this.setState({ isValidEmail: true })
+        }
+
+
+
         fetch('http://localhost:3333/api/1.0.0/user/' + this.state.user_id, {
             method: 'PATCH',
             headers: {
@@ -75,7 +114,9 @@ class EditProfile extends Component {
             .then(response => {
                 if (response.status === 200) {
                     // Success
+                    window.location.reload(false);
                     if (response.headers.get("Content-Type").indexOf("application/json") !== -1) {
+
                         return response.json(); // Parse response body as JSON
                     } else {
                         return response.text(); // Return response body as plain text
@@ -104,54 +145,41 @@ class EditProfile extends Component {
             });
     };
     handleUpdatePassword = () => {
+        let validatePassword = this.validatePassword(this.state.newPassword);
+        if (this.state.newPassword === this.state.newPassword2 && validatePassword) {
 
-        if (this.state.newPassword == this.state.newPassword2) {
 
-            if (this.validatePassword(this.state.newPassword) == true) {
 
-                this.setState({ password: this.state.newPassword });
+            this.setState({ password: this.state.newPassword });
 
-                fetch('http://localhost:3333/api/1.0.0/user/' + this.state.user_id, {
-                    method: 'PATCH',
-                    headers: {
-                        Accept: 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-Authorization': this.state.session_token,
-                    },
-                    body: JSON.stringify({
-                        password: this.state.password
-                    }),
+            fetch('http://localhost:3333/api/1.0.0/user/' + this.state.user_id, {
+                method: 'PATCH',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Authorization': this.state.session_token,
+                },
+                body: JSON.stringify({
+                    password: this.state.password
+                }),
+            })
+                .then(response => {
+                    console.log(response.status)
+                    if (response.status === 200) {
+                        // Success
+                        console.log(this.state.password);
+                        this.setState({ passwordChanged: true })
+
+                    } else {
+                        this.setState({ passwordChanged: false })
+                    }
                 })
-                    .then(response => {
-                        if (response.status === 200) {
-                            // Success
-                            if (response.headers.get("Content-Type").indexOf("application/json") !== -1) {
-                                return response.json(); // Parse response body as JSON
-                            } else {
-                                return response.text(); // Return response body as plain text
-                            }
-                        } else {
-                            // Error
-                            throw new Error('Something went wrong');
-                        }
-                    })
-                    .then(data => {
-                        if (typeof data === "object") {
-                            console.log(data); // Handle the JSON response
-                            this.setState({
-                                password: data.password
+                .catch(error => {
+                    console.error(error); // Handle the error
+                });
 
-                            });
-
-                        } else {
-                            console.log(data); // Handle the plain text response
-                        }
-                    })
-                    .catch(error => {
-                        console.error(error); // Handle the error
-                    });
-
-            }
+        } else {
+            this.setState({ passwordChanged: false })
         }
 
     };
@@ -214,22 +242,6 @@ class EditProfile extends Component {
         this.setState({ testOriginalPassword: newtext })
     };
 
-    handleChangePassword = () => {
-        // console.log(this.state.testOriginalPassword);
-        // console.log(this.state.password);
-        // if(this.state.testOriginalPassword==this.state.password){
-        console.log(2);
-        if (this.state.newPassword == this.state.newPassword2) {
-            console.log(3);
-            if (this.validatePassword(this.state.newPassword) == true) {
-                console.log(4);
-                this.setState({ password: this.state.newPassword });
-                this.handleUpdatePassword;
-                console.log(5);
-            }
-        }
-        // }
-    };
 
     validatePassword = (password) => {
         const schema = new passwordValidator();
@@ -258,7 +270,7 @@ class EditProfile extends Component {
 
         // const formData = new FormData();
         // formData.append('file', file);
-        
+
         // console.log("formData: " + file.toString());
         // Make a POST request to upload the file
         fetch('http://localhost:3333/api/1.0.0/user/' + this.state.user_id + '/photo', {
@@ -274,7 +286,7 @@ class EditProfile extends Component {
 
                 if (response.status === 200) {
                     // Success
-                    
+
                     this.handleGetUserPhoto();
                     return response; // Return the JSON response
                 } else {
@@ -285,7 +297,7 @@ class EditProfile extends Component {
             })
             .then(data => {
                 console.log(data); // Handle the JSON response
-                
+
 
             })
             .catch(error => {
@@ -313,7 +325,6 @@ class EditProfile extends Component {
 
                 if (response.status === 200) {
                     // Success
-                    // alert(response.blob());
                     return response.blob(); // Return the JSON response
                 } else {
                     // Error
@@ -323,11 +334,11 @@ class EditProfile extends Component {
             })
             .then(data => {
                 console.log("data here: " + data); // Handle the JSON response
-                
-                
+
+
                 const imageUrl = URL.createObjectURL(data);
                 console.log(imageUrl);
-                
+
                 this.setState({ userProfilePic: imageUrl })
             })
             .catch(error => {
@@ -349,38 +360,45 @@ class EditProfile extends Component {
                 />
                 <Text style={styles.name}>{this.state.first_name} {this.state.last_name}</Text>
                 <View style={styles.changeProfileInputs}>
-                    <div style={styles.pictureBox}>
+
+                    <View style={styles.pictureBox}>
                         <Text style={styles.btnTitle}>Choose an img</Text>
-                        {/* <TextInput style={styles.editProfileInputs}
-                        multiline={true} onChangeText={this.onChangeText} value={this.state.text}
-                        placeholder='Drag Image or img link'
-                    /> */}
                         <input
                             style={{ margin: 0, padding: 0 }}
                             type="file"
                             onChange={(event) => this.handleFileUpload(event.target.files[0])}
                         />
-                    </div>
-                    <Text style={styles.btnTitle}>First Name</Text>
-                    <TextInput style={styles.editProfileInputs} placeholder='first name'
-                        onChangeText={this.handleFirstNameTextChange}
-                        value={this.state.first_name} />
-                    <Text style={styles.btnTitle}>Last Name</Text>
-                    <TextInput style={styles.editProfileInputs} placeholder='last name'
-                        onChangeText={this.handleLastNameTextChange}
-                        value={this.state.last_name} />
-                    <Text style={styles.btnTitle}>Email</Text>
-                    <TextInput style={styles.editProfileInputs} placeholder='email'
-                        onChangeText={this.handleEmailTextChange}
-                        value={this.state.email} />
-                    {/* <Text style={styles.btnTitle}>Password</Text>
-                    <TextInput style={styles.editProfileInputs} placeholder='password' 
-                    onChangeText={this.handleFirstNameTextChange}
-                    value={this.state.password}/> */}
-                    <div style={styles.profileButtons}>
+                    </View>
+                    <View >
+                        <View>
+                            <Text style={styles.btnTitle}>First Name</Text>
+                            <TextInput style={styles.editProfileInputs} placeholder='first name'
+                                onChangeText={this.handleFirstNameTextChange}
+                                value={this.state.first_name} />
+                            {this.state.isValidFirstName == false ? (<View><Text style={styles.labelError}>Please Type In A First Name</Text></View>) : null}
+                        </View>
+                        <View>
+                            <Text style={styles.btnTitle}>Last Name</Text>
+                            <TextInput style={styles.editProfileInputs} placeholder='last name'
+                                onChangeText={this.handleLastNameTextChange}
+                                value={this.state.last_name} />
+                            {this.state.isValidLastName == false ? (<View><Text style={styles.labelError}>Please Type In A Last Name</Text></View>) : null}
+                        </View>
+                        <View>
+                            <Text style={styles.btnTitle}>Email</Text>
+                            <TextInput style={styles.editProfileInputs} placeholder='email'
+                                onChangeText={this.handleEmailTextChange}
+                                value={this.state.email} />
+                            {this.state.isValidEmail == false ? (<View><Text style={styles.labelError}>Please Type In A Valid Email</Text></View>) : null}
+
+
+                        </View>
+
+                    </View>
+                    <View style={styles.profileButtons}>
                         <Button title='Change Password' onPress={this.handleOverlay} />
                         <Button title="Change Profile" onPress={this.handleUpdateProfile} />
-                    </div>
+                    </View>
                     <View style={{ marginTop: 10 }}>
                         <Button title="Go Back" onPress={this.goBack} />
                     </View>
@@ -389,32 +407,49 @@ class EditProfile extends Component {
 
                 {/* OVERLAY */}
                 <Modal animationType="fade" transparent={true} visible={this.state.visible}>
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                        <View style={{ backgroundColor: 'white', padding: 60 }}>
-                            <Text style={styles.btnTitle}>Type Original Password</Text>
-
-                            {/* <TextInput style={styles.editProfileInputs} 
-                                onChangeText={this.handleOriginalPassword}
-                                value={this.state.testOriginalPassword} /> */}
-
-                            <Text style={styles.btnTitle}>Type New Password</Text>
-                            <TextInput style={styles.editProfileInputs}
-                                onChangeText={this.handleFirstNewPassword}
-                                value={this.state.newPassword} />
-
-                            <Text style={styles.btnTitle}>Verify Type New Password</Text>
-                            <TextInput style={styles.editProfileInputs}
-                                onChangeText={this.handle2ndNewPassword}
-                                value={this.state.newPassword2} />
-
-                            <Button title="Change Password" onPress={this.handleUpdatePassword} />
-                            <Button title="Close" onPress={this.handleOverlay} />
-                            {/* END OF OVERLAY */}
-
-
+                    <View style={styles.overlay}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.title}>Change Password</Text>
+                            {/* <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Original Password</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    onChangeText={this.handleOriginalPassword}
+                                    value={this.state.testOriginalPassword}
+                                    secureTextEntry={true}
+                                />
+                            </View> */}
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>New Password</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    onChangeText={this.handleFirstNewPassword}
+                                    value={this.state.newPassword}
+                                    secureTextEntry={true}
+                                />
+                            </View>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Verify New Password</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    onChangeText={this.handle2ndNewPassword}
+                                    value={this.state.newPassword2}
+                                    secureTextEntry={true}
+                                />
+                            </View>
+                            {this.state.passwordChanged === true ? (<View><Text style={{ color: '#34C759' }}>Password Has Changed</Text></View>) :
+                                this.state.passwordChanged === false ? (<View><Text style={{ color: '#DC143C' }}>Password Has Not Changed</Text></View>) : null}
+                            <View style={styles.buttonContainer}>
+                                <Button title="Change Password" onPress={this.handleUpdatePassword} />
+                                <View style={{ marginTop: 10 }}>
+                                    <Button title="Close" onPress={this.handleOverlay} />
+                                </View>
+                            </View>
                         </View>
                     </View>
                 </Modal>
+
+                {/* END OF OVERLAY */}
             </View>
         );
     }
@@ -434,11 +469,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     profilePic: {
-        width: 100,
-        height: 100,
+        alignItems: 'center',
+        width: 200,
+        height: 200,
         borderRadius: 100,
-        // marginBottom: 20,
-        marginTop: 5,
+        marginBottom: 20,
+        marginTop: 20,
     },
     name: {
         fontSize: 24,
@@ -462,6 +498,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
+        marginVertical: 10,
         // alignContent:'center',
         // textAlign:'center',
     },
@@ -489,7 +526,50 @@ const styles = StyleSheet.create({
     btnTitle: {
         fontSize: 16,
 
-    }
+    },
+    overlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        padding: 30,
+        borderRadius: 10,
+        alignItems: 'center'
+    },
+    title: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 20
+    },
+    inputContainer: {
+        marginBottom: 20,
+        width: '100%'
+    },
+    label: {
+        fontWeight: 'bold',
+        marginBottom: 5
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        width: '100%'
+    },
+    buttonContainer: {
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        marginTop: 10,
+        width: '100%'
+    },
+    labelError: {
+        fontWeight: 'bold',
+        marginBottom: 10,
+        color: '#f02b1d'
+    },
 });
 
 export default EditProfile;

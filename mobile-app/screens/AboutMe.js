@@ -1,15 +1,31 @@
 import React, { Component } from 'react';
 import { Text, TextInput, View, Button, Alert, StyleSheet,Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { color } from 'react-native-reanimated';
+// import ApiService from '../services/ApiService'
 
 class AboutMe extends Component {
   componentDidMount() {
-    this.refreshInterval = setInterval(this.getUserInfo(), 1000);
-    this.refreshInterval = setInterval(this.handleGetUserPhoto(), 1000);
+    // this.refreshInterval = setInterval(this.getUserInfo(), 1000);
+    // this.refreshInterval = setInterval(this.handleGetUserPhoto(), 1000);
+      this.handleGetUserPhoto();
+      this.getUserInfo();
+    // this.refreshInterval = setInterval(() => {
+    //   this.handleGetUserPhoto();
+    //   this.getUserInfo();
+    // }, 1000);
+    // this.apiService.getUserInfo()
+    // .then(() => {
+    //   const { user_id, session_token } = this.apiService.getState();
+    //   this.setState({ user_id, session_token });
+    // })
+    // .catch((error) => console.log(error));
   }
 
   constructor(props) {
     super(props);
+    // this.apiService = new ApiService();
     this.state = {
       first_name: '',
       last_name: '',
@@ -18,7 +34,7 @@ class AboutMe extends Component {
       session_token: '',
       userProfilePic: 'https://www.ateneo.edu/sites/default/files/styles/large/public/2021-11/istockphoto-517998264-612x612.jpeg?itok=aMC1MRHJ',
     };
-    this.getUserInfo = this.getUserInfo.bind(this);
+    // this.getUserInfo = this.getUserInfo.bind(this);
   }
 
   setUserInfo = () => {
@@ -139,56 +155,47 @@ class AboutMe extends Component {
               source={{ uri: this.state.userProfilePic }}
           />
           </View>
+          <View>
         <View style={styles.aboutContainer}>
           <Text style={styles.name}>
             {this.state.first_name} {this.state.last_name}
           </Text>
           <Text style={styles.email}>{this.state.email}</Text>
         </View>
-        <Button title="Edit Profile" onPress={this.handleEditProfile}/>
-        <Button title="Logout" onPress={this.logout} />
+        <View style={{flex:1,flexDirection:'row',justifyContent:'space-evenly'}}>
+          <TouchableOpacity style={styles.button} onPress={this.handleEditProfile}><Text style={styles.buttonText}>Edit Profile</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.button}  onPress={this.logout}><Text  style={styles.buttonText}>Logout</Text></TouchableOpacity>
+        </View>
+        </View>
       </View>
     );
   }
 }
 
-    // container: {
-    //     backgroundColor:'white',
-    //     flex: 1,
-    //     alignItems: 'center',
-    //     // justifyContent: 'center',
-    //     padding: 1,
-    // },
-    // container: {
-    //   flex: 1,
-    //   backgroundColor: 'white',
-    //   padding: 20,
-    //   gap:7
-    // },
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    padding: 20,
+    padding: 30,
     gap:7
   },
   innerContainer: {
     flex: 1,
     backgroundColor: 'white',
     alignItems: 'center',
-    padding: 20,
+    padding: 15,
     gap:7
   },
   profilePic: {
     alignItems: 'center',
-    width: 100,
-    height: 100,
-    borderRadius: 100,
-    marginBottom: 20,
+    width: 230,
+    height: 230,
+    borderRadius: 130,
+    marginBottom: 10,
     marginTop: 20,
-},
+  },
   aboutContainer: {
-    marginTop: 50,
+    marginTop: 30,
     marginBottom: 30,
     alignItems: 'center',
   },
@@ -202,11 +209,16 @@ const styles = StyleSheet.create({
     color: '#777',
     marginBottom: 10,
   },
-  // profileBtn: {
-  //   // fontSize: 18,
-  //   // color: '#777',
-  //   justifyContent: 'space-between',
-  // },
+  button:{
+    backgroundColor:'#1e90ff',
+    padding:15,
+    borderRadius:5
+  },
+  buttonText:{
+    color:'white',
+    fontWeight:'bold'
+  }
+
 });
 
 export default AboutMe;

@@ -1,46 +1,18 @@
 import React, { Component } from 'react';
 import { Text, TextInput, View, Button, Alert, Modal, SearchBar, FlatList, VirtualizedList, SafeAreaView, StatusBar, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LockedOverlay from '../SettingsComponents/LockedScreen';
 
-// const friends = [
-//   { id: 1, name: 'John Doe' },
-//   { id: 2, name: 'Jane Smith' },
-//   { id: 3, name: 'Bob Johnson' },
-//   { id: 4, name: 'Alice Brown' },
-//   { id: 5, name: 'Tom Wilson' },
-//   { id: 6, name: 'Mary Davis' },
-//   { id: 7, name: 'Peter Lee' },
-//   { id: 8, name: 'Lucy Kim' },
-//   { id: 9, name: 'David Chang' },
-//   { id: 10, name: 'Tom Wilson' },
-//   { id: 11, name: 'Mary Davis' },
-//   { id: 12, name: 'Peter Lee' },
-//   { id: 13, name: 'Lucy Kim' },
-//   { id: 14, name: 'David Chang' },
-// ];
 
-// const getItemCount = () => friends.length;
-// const getItem = (data, index) => ({
-//   id: data[index].id,
-//   title: data[index].name,
-// });
-
-// const Item = ({title}) => (
-//   <View style={styles.item}>
-//     <Text style={styles.title}>{title}</Text>
-//   </View>
-// );
-
-const Item = ({ title }) => (
-  <View>
-    <Text>{title}</Text>
-  </View>
-);
 
 class Settings extends Component {
   componentDidMount() {
     this.getChatInfo();
 
+    this.refreshInterval = setInterval(() => {
+      this.getChatMembers();
+      // this.getUserInfo();
+    }, 1000);
     // this.refreshInterval = setInterval(this.getAllConversations, 1000); // refresh every 5 seconds
   }
   constructor(props) {
@@ -59,8 +31,10 @@ class Settings extends Component {
       deleteUserName: '',
       data: "",
       searchQuery: '',
-      chatMembers: '',
-
+      chatMembers: "",
+      user_id: '',
+      chat_creator_id: '',
+      
     };
   }
 
@@ -71,10 +45,11 @@ class Settings extends Component {
       AsyncStorage.getItem('chat_name'),
       AsyncStorage.getItem('session_token'),
       AsyncStorage.getItem('user_id'),
+      AsyncStorage.getItem('chat_creator_id'),
     ])
-      .then(([chat_id, chat_name, session_token, user_id]) => {
+      .then(([chat_id, chat_name, session_token, user_id, chat_creator_id]) => {
         if (chat_id && chat_name) {
-          this.setState({ chat_id, chat_name, session_token, user_id });
+          this.setState({ chat_id, chat_name, session_token, user_id, chat_creator_id });
           // console.log(this.state.chat_id,this.state.chat_name);
           // console.log(this.state.session_token);
           this.getAllConversations();
@@ -110,52 +85,6 @@ class Settings extends Component {
     // return this.state.data[index];
   };
 
-  getChatMembers = () => {
-    // console.log(this.state.session_token)
-    fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chat_id, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        "X-Authorization": this.state.session_token,
-      },
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          // Success
-          return response.json(); // Return the JSON response
-        } else {
-          // Error
-          throw new Error("Something went wrong");
-        }
-      })
-      .then((data) => {
-
-        // const contacts = data.map((item) => ({
-        //   id: item.user_id,
-        //   title: `${item.first_name} ${item.last_name}`,
-        //   email: item.email,
-        // }));
-
-        console.log(data); // Handle the JSON response
-        // create an array of contacts available
-        const memberNames = data.members.map((member) => ({
-          id: member.user_id,
-          title: `${member.first_name} ${member.last_name}`,
-          email: member.email
-        }));
-
-        console.log(memberNames);
-
-        this.setState({
-          chatMembers: memberNames,
-        });
-      })
-      .catch((error) => {
-        console.error(error); // Handle the error
-      });
-  };
-
   getContacts = () => {
     console.log(this.state.session_token)
     fetch("http://localhost:3333/api/1.0.0/contacts", {
@@ -182,15 +111,75 @@ class Settings extends Component {
           id: item.user_id,
           title: `${item.first_name} ${item.last_name}`,
           email: item.email,
+          isMember: false, // Set the initial value to false
         }));
         this.setState({
           data: contacts,
+        });
+
+        // Call the function to get the chat members after getting the contacts
+        this.getChatMembers();
+      })
+      .catch((error) => {
+        console.error(error); // Handle the error
+      });
+  };
+
+  getChatMembers = () => {
+    // console.log(this.state.session_token)
+    fetch("http://localhost:3333/api/1.0.0/chat/" + this.state.chat_id, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-Authorization": this.state.session_token,
+      },
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          // Success
+          return response.json(); // Return the JSON response
+        } else {
+          // Error
+          throw new Error("Something went wrong");
+        }
+      })
+      .then((data) => {
+        // Handle the JSON response
+        // create an array of contacts available
+
+        const memberNames = data.members
+          .filter((member) => (parseInt(member.user_id)) !== (parseInt(this.state.user_id)))
+          .map((member) => ({
+            id: member.user_id,
+            title: `${member.first_name} ${member.last_name}`,
+            email: member.email,
+          }));
+
+        console.log(memberNames);
+
+        // Loop through the contacts and set the isMember property to true for the matching contacts
+        const updatedContacts = this.state.data.map((contact) => {
+          if (memberNames.find((member) => member.id === contact.id)) {
+            return {
+              ...contact,
+              isMember: true,
+            };
+          } else {
+            return contact;
+          }
+        });
+
+        this.setState({
+          chatMembers: memberNames,
+          data: updatedContacts, // Update the state with the updated contacts array
         });
       })
       .catch((error) => {
         console.error(error); // Handle the error
       });
   };
+
 
 
   addUserFromChatHandleOverlay = () => {
@@ -202,7 +191,7 @@ class Settings extends Component {
 
   handleDeleteAUserFromChatOverlay = () => {
     this.setState({ overlayDeleteUserVisible: !this.state.overlayDeleteUserVisible });
-
+    this.getContacts();
     this.getChatMembers();
     this.setState({ searchQuery: '' });
   };
@@ -350,16 +339,6 @@ class Settings extends Component {
     );
   };
 
-  // getItemCount = (data) => data.length;
-
-  // getItem = (data, index) => data[index];
-
-  //  Item = ({title}) => (
-  //   <View style={styles.item}>
-  //     <Text style={styles.title}>{title}</Text>
-  //   </View>
-  // );
-
   toggleModal = () => {
     this.setState((prevState) => ({ isModalVisible: !prevState.isModalVisible }));
   };
@@ -418,8 +397,8 @@ class Settings extends Component {
 
   }
   handleDeleteUserFromChat = (item) => {
-    // console.log(item+" "+" "+this.state.chat_id);
-    // console.log(item);
+    this.getChatMembers();
+
     this.deleteUserFromChat(item);
   }
 
@@ -427,118 +406,108 @@ class Settings extends Component {
 
   render() {
 
-
     return (
 
-      <View>
-        <Text>Add a user to the chat</Text>
-        <TextInput placeholder='Type Their Email'
-          onChangeText={this.addUserNameTextChange}
-          value={this.state.addUserName}
-        />
-        <Button onPress={this.addUserFromChatHandleOverlay} title="add user" />
+      <View style={styles.wholecontainer}>
+        <View>
+        {this.state.chat_creator_id !== this.state.user_id && <LockedOverlay />}
 
-        <Text>Remove a user from the chat</Text>
-        <TextInput placeholder='Type Their Email'
-          onChangeText={this.deleteUserNameTextChange}
-          value={this.state.deleteUserName}
-        />
-        <Button onPress={this.handleDeleteAUserFromChatOverlay} title="Delete a user" />
+        
+            <View>
+              <View style={styles.section}>
+                <Text style={styles.heading}>Add A Friend Contact To The Chat</Text>
 
-        <Text>Change Chat Name</Text>
-        <TextInput placeholder='chat name'
-          onChangeText={this.changeChatName}
-          value={this.state.chat_name}
-        />
-        <Button onPress={this.handleChatNameChange} title="Change chat name" />
+                <Button onPress={this.addUserFromChatHandleOverlay} title="add user" />
+              </View>
 
-        <Modal animationType="fade" transparent={true} visible={this.state.overlayAddUserVisible}   >
-          <div style={styles.modelContainer}>
+              <View style={styles.section}>
+                <Text style={styles.heading}>Remove A User From The Chat</Text>
 
-            {/* <View style={{ height: 50, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 20 }}>Select a friend</Text>
-              </View> */}
-            <SafeAreaView style={styles.container}>
-              <TextInput
-                style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-                onChangeText={(text) => this.searchFilterFunction(text)}
-                value={this.state.searchQuery}
-                placeholder="Search..."
-              />
-              {/* <SearchBar
-          placeholder="Search..."
-          onChangeText={searchFilterFunction}
-          value={this.state.searchQuery}
-        /> */}
-              <VirtualizedList
-                data={this.state.data}
-                getItemCount={this.getItemCount}
-                getItem={this.getItem}
+                <Button onPress={this.handleDeleteAUserFromChatOverlay} title="Delete a user" />
+              </View>
 
-                renderItem={({ item }) => {
-                  console.log("hi im a ITEM: " + item);
-                  return (
-                    <TouchableOpacity onPress={() => this.handleAddUserToChat(item.id)}>
+              <View style={styles.section}>
+                <Text style={styles.heading}>Change Chat Name</Text>
+                <TextInput placeholder='chat name'
+                  onChangeText={this.changeChatName}
+                  value={this.state.chat_name}
+                  style={styles.chatName}
+                />
+                <Button onPress={this.handleChatNameChange} title="Change chat name" />
+              </View>
 
-                      <View style={{ padding: 10 }}>
-                        <Item title={item.title + "\n" + item.email} />
-                      </View>
+              {/* Add A USER OVERLAY */}
+              <Modal animationType="fade" transparent={true} visible={this.state.overlayAddUserVisible}>
+                <View style={styles.modalContainer}>
+                  <View style={styles.contentContainer}>
+                    <View style={styles.titleContainer}>
+                      <Text style={styles.titleText}>Add A Friend Contact To The Chat</Text>
+                    </View>
+                    <FlatList
+                      style={{ height: 300 }}
+                      data={this.state.data}
+                      renderItem={({ item }) => {
+
+                        return (
+                          <TouchableOpacity onPress={() => this.handleAddUserToChat(item.id)}>
+                            <View style={styles.itemContainer}>
+                              {item.isMember==true ? (
+                                <View style={styles.currentMemberItem}>
+                                <Text style={styles.itemTitle}>{item.title}</Text>
+                                <Text style={styles.itemEmail}>{item.email}</Text>
+
+                                </View>
+                              ):(
+                                <View>
+                              <Text style={styles.itemTitle}>{item.title}</Text>
+                              <Text style={styles.itemEmail}>{item.email}</Text>
+                              </View>
+    )}
+                            </View>
+                          </TouchableOpacity>
+                        );
+                      }}
+                      keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
+                    />
+                    <TouchableOpacity style={styles.closeButton} onPress={this.addUserFromChatHandleOverlay}>
+                      <Text style={styles.closeButtonText}>Close</Text>
                     </TouchableOpacity>
-                  );
-                }}
-                keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
-              />
-            </SafeAreaView>
+                  </View>
+                </View>
+              </Modal>
 
-            <Button title="Close" onPress={this.addUserFromChatHandleOverlay} />
+              {/* DELETE A USER OVERLAY */}
+              <Modal animationType="fade" transparent={true} visible={this.state.overlayDeleteUserVisible}   >
+                <View style={styles.modalContainer}>
+                  <View style={styles.contentContainer}>
+                    <View style={styles.titleContainer}>
+                      <Text style={styles.titleText}>Remove A User From The Chat</Text>
+                    </View>
+                    <FlatList
+                      style={{ height: 300 }}
+                      data={this.state.chatMembers}
+                      renderItem={({ item }) => {
 
-          </div>
-        </Modal>
-
-        {/* DELETE A USER OVERLAY */}
-        <Modal animationType="fade" transparent={true} visible={this.state.overlayDeleteUserVisible}   >
-          <div style={styles.modelContainer}>
-
-            {/* <View style={{ height: 50, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ fontSize: 20 }}>Select a friend</Text>
-              </View> */}
-            <SafeAreaView style={styles.container}>
-              <TextInput
-                style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-                onChangeText={(text) => this.searchFilterFunction(text)}
-                value={this.state.searchQuery}
-                placeholder="Search..."
-              />
-              {/* <SearchBar
-          placeholder="Search..."
-          onChangeText={searchFilterFunction}
-          value={this.state.searchQuery}
-        /> */}
-              <VirtualizedList
-                data={this.state.chatMembers}
-                getItemCount={this.getChatMembersItemCount}
-                getItem={this.getChatMembersItem}
-
-                renderItem={({ item }) => {
-                  console.log("ITEM HERE: " + item);
-                  return (
-                    <TouchableOpacity onPress={() => this.handleDeleteUserFromChat(item.id)}>
-
-                      <View style={{ padding: 10 }}>
-                        <Item title={item.title + "\n" + item.email} />
-                      </View>
+                        return (
+                          <TouchableOpacity onPress={() => this.handleDeleteUserFromChat(item.id)}>
+                            <View style={styles.itemContainer}>
+                              <Text style={styles.itemTitle}>{item.title}</Text>
+                              <Text style={styles.itemEmail}>{item.email}</Text>
+                            </View>
+                          </TouchableOpacity>
+                        );
+                      }}
+                      keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
+                    />
+                    <TouchableOpacity style={styles.closeButton} onPress={this.handleDeleteAUserFromChatOverlay}>
+                      <Text style={styles.closeButtonText}>Close</Text>
                     </TouchableOpacity>
-                  );
-                }}
-                keyExtractor={(item) => (item && item.id) ? item.id.toString() : ''}
-              />
-            </SafeAreaView>
-
-            <Button title="Close" onPress={this.handleDeleteAUserFromChatOverlay} />
-
-          </div>
-        </Modal>
-
+                  </View>
+                </View>
+              </Modal>
+            </View>
+       
+        </View>
       </View>
 
 
@@ -547,35 +516,74 @@ class Settings extends Component {
 }
 
 const styles = StyleSheet.create({
+
+  wholecontainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   container: {
     flex: 1,
     marginTop: StatusBar.currentHeight,
     // width:'50%',
+    backgroundColor: 'white',
     height: '80%',
     justifyContent: 'center',
     alignContent: 'center',
 
   },
-  modelContainer: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 80,
-    right: 0,
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  contentContainer: {
     width: '80%',
-    height: '90%',
     backgroundColor: 'white',
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    overflow: 'hidden',
     elevation: 5,
+  },
+  titleContainer: {
+    backgroundColor: '#4285F4',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  titleText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  itemContainer: {
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    marginVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+  },
+  itemTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  itemEmail: {
+    fontSize: 14,
+    color: '#8C8C8C',
+  },
+  closeButton: {
+    backgroundColor: '#4285F4',
+    alignSelf: 'center',
+    padding: 10,
+    paddingHorizontal: 40,
+    borderRadius: 5,
+
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+
   },
   item: {
     backgroundColor: '#f9c2ff',
@@ -588,6 +596,32 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
   },
+  heading: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  section: {
+    textAlign: 'center',
+    marginTop: 40,
+    borderRadius: 5,
+    boxShadow: '0px 0px 5px 0px rgba(0,0,0,0.7)',
+    padding: 20,
+    margin: 10
+    // marginBottom: 20,
+  },
+  chatName: {
+    textAlign: 'center',
+    borderRadius: 5,
+    boxShadow: '0px 0px 5px 0px rgba(0,0,0,0.7)',
+    padding: 10,
+    margin: 10,
+  },
+  currentMemberItem:{
+    backgroundColor:'#90EE90',
+    borderRadius:5,
+    paddingVertical:8
+  }
 });
 
 export default Settings;
